@@ -8,6 +8,7 @@ using Unity.Netcode;
 using UnityEngine;
 using UnityEngine.UI;
 using TMPro;
+using UnityEngine.SceneManagement;
 
 namespace Assets {
     public class Game : NetworkBehaviour
@@ -34,6 +35,7 @@ namespace Assets {
         [SerializeField] private Button menuButton;
         [SerializeField] private PopUpDialogue popUpDialogue;
         [SerializeField] private Fader fader;
+        [SerializeField] private bool local;
         public enum PlayerID
         {
             Player1, Player2
@@ -64,10 +66,25 @@ namespace Assets {
                 RemotePlayer.active = menuScreen.gameObject.activeInHierarchy;
                 
             });
+            NetworkManager.Singleton.GetComponent<NetworkConnection>().AddDisconnectCallback((clientId) =>
+            {
+                popUpDialogue.OpenDialogue("Dein Gegner hat das Spiel verlassen. Möchtest du zum Menu zurückkehren?", "Ja", "Nein", () =>
+                {
+                    NetworkManager.Singleton.Shutdown();
+                    SceneManager.LoadScene("MenuScene");
+                });
+            });
 
-            if (!NetworkManager.Singleton.IsHost)
-                onSceneLoadFinishedServerRpc();
-
+            if (local)
+            {
+                onSceneLoadFinished();
+            }
+            else
+            {
+                if (!NetworkManager.Singleton.IsHost)
+                    onSceneLoadFinishedServerRpc();
+            }
+            
 
 
         }
@@ -76,12 +93,24 @@ namespace Assets {
         {
             Debug.Log($"Initializing Game for {NetworkManager.Singleton.ConnectedClients.Count} clients");
 
+            onSceneLoadFinished();
+        }
+
+        private void onSceneLoadFinished()
+        {
             var random = new System.Random();
             List<int> hostOrdering = Enumerable.Range(2, 58).OrderBy(a => random.Next()).ToList();
             List<int> clientOrdering = Enumerable.Range(2, 58).OrderBy(a => random.Next()).ToList();
             PlayerID hostPlayerId = random.Next(2) == 0 ? PlayerID.Player1 : PlayerID.Player2;
             PlayerID clientPlayerId = hostPlayerId.Equals(PlayerID.Player2) ? PlayerID.Player1 : PlayerID.Player2;
-            setupGameClientRpc(hostPlayerId, clientPlayerId, hostOrdering.ToArray(), clientOrdering.ToArray());
+            if (local)
+            {
+                setupGameClient(hostPlayerId, clientPlayerId, hostOrdering.ToArray(), clientOrdering.ToArray());
+            }
+            else 
+            {
+                setupGameClientRpc(hostPlayerId, clientPlayerId, hostOrdering.ToArray(), clientOrdering.ToArray());
+            }
         }
 
         private void Update()
@@ -104,11 +133,17 @@ namespace Assets {
         private void setupGameClientRpc(PlayerID hostPlayerId, PlayerID clientPlayerId, int[] hostOrdering, int[] clientOrdering)
         {
             Debug.Log($"Setup game on client {NetworkManager.Singleton.LocalClientId}");
+            setupGameClient(hostPlayerId, clientPlayerId, hostOrdering, clientOrdering);
+        }
+
+        private void setupGameClient(PlayerID hostPlayerId, PlayerID clientPlayerId, int[] hostOrdering, int[] clientOrdering)
+        {
+       
             PlayerID myPlayerId;
             PlayerID otherPlayerId;
             List<int> myOrdering;
             List<int> otherOrdering;
-            if (NetworkManager.Singleton.IsHost)
+            if (local || NetworkManager.Singleton.IsHost)
             {
                 myPlayerId = hostPlayerId;
                 otherPlayerId = clientPlayerId;
@@ -126,8 +161,8 @@ namespace Assets {
             LocalPlayer = FindObjectOfType<LocalPlayer>();
             RemotePlayer = FindObjectOfType<RemotePlayer>();
             fader.StartFading();
-            LocalPlayer.initGame(myPlayerId, cardPrefab, onCardPlayed, onTurnFinished, myOrdering);
-            RemotePlayer.initGame(otherPlayerId, cardPrefab, onCardPlayed, onTurnFinished, otherOrdering);
+            LocalPlayer.initGame(myPlayerId, cardPrefab, onCardPlayedLocal, onTurnFinishedLocal, myOrdering);
+            RemotePlayer.initGame(otherPlayerId, cardPrefab, onCardPlayedLocal, onTurnFinishedLocal, otherOrdering);
             currentTurn = new Turn(PlayerID.Player1);
             gameState = GameState.Rounds;
             allTurns = new List<Turn>();
@@ -191,26 +226,51 @@ namespace Assets {
             }
         }
 
-        private void onCardPlayed(DiscardActionParameters parameters)
+        private void onCardPlayedLocal(DiscardActionParameters parameters)
         {
-            if (NetworkManager.Singleton.IsHost)
+            if (local)
             {
-                Debug.Log("Sending Clients request to play card");
-                onCardPlayedClientRpc(parameters.PlayerID, parameters.PileType, parameters.CardNumber);
-                if(gameFinished())
+                onCardPlayed(parameters);
+                if (gameFinished())
                 {
-                    onGameFinishedClientRpc(endingProperties.winner, endingProperties.noTurnsLeftCondition);
+                    onGameFinished(endingProperties.winner, endingProperties.noTurnsLeftCondition);
                 }
             }
-            else if(NetworkManager.Singleton.IsClient)
+            else
             {
-                Debug.Log("Sending Host request to accept card play");
-                onCardPlayedServerRpc(parameters.PlayerID, parameters.PileType, parameters.CardNumber);
+                if (NetworkManager.Singleton.IsHost)
+                {
+                    Debug.Log("Sending Clients request to play card");
+                    onCardPlayedClientRpc(parameters.PlayerID, parameters.PileType, parameters.CardNumber);
+                    if (gameFinished())
+                    {
+                        onGameFinishedClientRpc(endingProperties.winner, endingProperties.noTurnsLeftCondition);
+                    }
+                }
+                else if (NetworkManager.Singleton.IsClient)
+                {
+                    Debug.Log("Sending Host request to accept card play");
+                    onCardPlayedServerRpc(parameters.PlayerID, parameters.PileType, parameters.CardNumber);
+                }
             }
+        }
+
+        private void onCardPlayed(DiscardActionParameters parameters)
+        {
+            updateHand(parameters);
+            currentTurn.DiscardActionParameters.Add(parameters);
+            LocalPlayer.TurnChanged(currentTurn);
+            RemotePlayer.TurnChanged(currentTurn);
         }
 
         [ClientRpc]
         private void onGameFinishedClientRpc(PlayerID winner, bool noTurnsLeftCondition)
+        {
+            onGameFinished(winner, noTurnsLeftCondition);
+
+        }
+
+        private void onGameFinished(PlayerID winner, bool noTurnsLeftCondition)
         {
             gameState = GameState.Finished;
             endScreen.victory = winner.Equals(LocalPlayer.PlayerID);
@@ -218,63 +278,74 @@ namespace Assets {
             endScreen.onReplayCallback = onReplayRequest;
             endScreen.gameObject.SetActive(true);
             LocalPlayer.active = false;
-
         }
 
         [ServerRpc(RequireOwnership = false)]
         private void onCardPlayedServerRpc(PlayerID playerID, PileType pileType, int cardNumber)
         {
             Debug.Log("Client request for card play received");
-            onCardPlayed(new DiscardActionParameters(playerID, pileType, cardNumber));
+            onCardPlayedLocal(new DiscardActionParameters(playerID, pileType, cardNumber));
         }
 
         [ClientRpc]
         private void onCardPlayedClientRpc(PlayerID playerID, PileType pileType, int cardNumber)
         {
-            Debug.Log("Play card on client");
-            Debug.Log(playerID);
+            Debug.Log($"Play card on client {playerID}");
             var parameters = new DiscardActionParameters(playerID, pileType, cardNumber);
-            updateHand(parameters);
-            currentTurn.DiscardActionParameters.Add(parameters);
-            LocalPlayer.TurnChanged(currentTurn);
-            RemotePlayer.TurnChanged(currentTurn);
+            onCardPlayed(parameters);
         }
 
         [ServerRpc(RequireOwnership = false)]
         private void onTurnFinishedServerRpc()
         {
             Debug.Log("Turn finish request from Client received");
-            onTurnFinished();
+            onTurnFinishedLocal();
         }
 
         [ClientRpc]
         private void onTurnFinishedClientRpc()
         {
             Debug.Log("Turn finish on client");
-            currentTurn = new Turn(currentTurn.PlayerID.Equals(PlayerID.Player1) ? PlayerID.Player2 : PlayerID.Player1);
-            allTurns.Add(currentTurn);
-            LocalPlayer.TurnChanged(currentTurn);
-            RemotePlayer.TurnChanged(currentTurn);
+            onTurnFinished();
 
         }
 
 
-        private void onTurnFinished()
+        private void onTurnFinishedLocal()
         {
-            if (NetworkManager.Singleton.IsHost)
+            if (local)
             {
-                Debug.Log("Sending Turn Finish Request to Clients");
-                onTurnFinishedClientRpc();
+                onTurnFinished();
                 if (gameFinished())
                 {
                     onGameFinishedClientRpc(endingProperties.winner, endingProperties.noTurnsLeftCondition);
                 }
             }
-            else if(NetworkManager.Singleton.IsClient)
+            else
             {
-                Debug.Log("Sending Turn finish request to Server");
-                onTurnFinishedServerRpc();
+                if (NetworkManager.Singleton.IsHost)
+                {
+                    Debug.Log("Sending Turn Finish Request to Clients");
+                    onTurnFinishedClientRpc();
+                    if (gameFinished())
+                    {
+                        onGameFinishedClientRpc(endingProperties.winner, endingProperties.noTurnsLeftCondition);
+                    }
+                }
+                else if (NetworkManager.Singleton.IsClient)
+                {
+                    Debug.Log("Sending Turn finish request to Server");
+                    onTurnFinishedServerRpc();
+                }
             }
+        }
+
+        private void onTurnFinished()
+        {
+            currentTurn = new Turn(currentTurn.PlayerID.Equals(PlayerID.Player1) ? PlayerID.Player2 : PlayerID.Player1);
+            allTurns.Add(currentTurn);
+            LocalPlayer.TurnChanged(currentTurn);
+            RemotePlayer.TurnChanged(currentTurn);
         }
         private bool gameFinished()
         {
@@ -295,14 +366,22 @@ namespace Assets {
 
         private void onReplayRequest()
         {
-            if(NetworkManager.Singleton.IsHost)
+            if (local) 
             {
-                onReplayRequestClientRpc(LocalPlayer.PlayerID);
+                SceneManager.LoadScene("LocalGameScene");
             }
-            else if(NetworkManager.Singleton.IsClient)
+            else
             {
-                onReplayRequestServerRpc(LocalPlayer.PlayerID);
+                if (NetworkManager.Singleton.IsHost)
+                {
+                    onReplayRequestClientRpc(LocalPlayer.PlayerID);
+                }
+                else if (NetworkManager.Singleton.IsClient)
+                {
+                    onReplayRequestServerRpc(LocalPlayer.PlayerID);
+                }
             }
+            
         }
 
         [ClientRpc]
@@ -331,7 +410,12 @@ namespace Assets {
         {
             NetworkManager.SceneManager.LoadScene("GameScene", UnityEngine.SceneManagement.LoadSceneMode.Single);
         }
-    
+
+        private void Tick()
+        {
+            Debug.Log($"Tick: {NetworkManager.LocalTime.Tick}");
+        }
+
     }
 }
 

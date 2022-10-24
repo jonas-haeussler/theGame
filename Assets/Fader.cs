@@ -20,7 +20,6 @@ public class Fader : MonoBehaviour
         if (!fading) return;
         var color = GetComponent<Image>().color;
         color.a = 1 - (Time.realtimeSinceStartup - startTime) / duration;
-        Debug.Log(color.a);
         GetComponent<Image>().color = color;
         if (color.a <= 0) gameObject.SetActive(false);
     }

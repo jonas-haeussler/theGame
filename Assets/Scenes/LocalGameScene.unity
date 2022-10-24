@@ -1159,7 +1159,7 @@ PrefabInstance:
     m_Modifications:
     - target: {fileID: 4595673690261106231, guid: c1449e405a95ad54d826884686b5bdbd, type: 3}
       propertyPath: GlobalObjectIdHash
-      value: 420667092
+      value: 2969273393
       objectReference: {fileID: 0}
     - target: {fileID: 8459654809809634443, guid: c1449e405a95ad54d826884686b5bdbd, type: 3}
       propertyPath: m_Name
@@ -1169,6 +1169,10 @@ PrefabInstance:
       propertyPath: fader
       value: 
       objectReference: {fileID: 2083203311}
+    - target: {fileID: 8459654809809634444, guid: c1449e405a95ad54d826884686b5bdbd, type: 3}
+      propertyPath: local
+      value: 1
+      objectReference: {fileID: 0}
     - target: {fileID: 8459654809809634444, guid: c1449e405a95ad54d826884686b5bdbd, type: 3}
       propertyPath: endScreen
       value: 

@@ -31,9 +31,8 @@ namespace Assets
 
         internal LobbyState lobbyState;
 
-        private float pollTime;
 
-        private Lobby lobby;
+        internal Lobby lobby;
 
         private Allocation allocation;
 
@@ -105,10 +104,11 @@ namespace Assets
             return;
         }
 
+        
+
         // Update is called once per frame
         void Update()
         {
-            pollTime += Time.deltaTime;
             switch(lobbyState)
             {
                 case LobbyState.create:
@@ -126,19 +126,6 @@ namespace Assets
                     lobbyName.gameObject.SetActive(false);
                     gamestartButton.gameObject.SetActive(false);
                     spinner.SetActive(true);
-                    if(pollTime > 2)
-                    {
-                        int clientCount = NetworkManager.Singleton.ConnectedClients.Count;
-                        Debug.Log($"Poll clientCount: {clientCount}");
-                        pollTime = 0;
-                        if (clientCount == 2)
-                        {
-                            Debug.Log("Client connected!");
-
-                            lobbyState = LobbyState.ready;
-                        }
-
-                    }
                     break;
                 case LobbyState.waitingForHost:
                     heading.text = "Warten auf Host für Spielstart";
@@ -223,15 +210,16 @@ namespace Assets
             {
                 if (lobby != null)
                 {
-                    if (lobbyState.Equals(LobbyState.waitingForClient))
+                    if (lobbyState.Equals(LobbyState.waitingForClient) || lobbyState.Equals(LobbyState.ready))
                     {
                         await LobbyService.Instance.DeleteLobbyAsync(lobby.Id);
                     }
                     else
                     {
-
+                        
                         string playerId = AuthenticationService.Instance.PlayerId;
                         await LobbyService.Instance.RemovePlayerAsync(lobby.Id, playerId);
+                        Debug.Log($"Leaving lobby as player {playerId}");
                     }
                 }
             } catch(LobbyServiceException e)

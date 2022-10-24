@@ -2,6 +2,7 @@
 using System.Collections;
 using System;
 using UnityEngine;
+using System.Collections.Generic;
 
 namespace Assets
 {
@@ -36,15 +37,26 @@ namespace Assets
             base.TurnChanged(currentTurn);
             if (isMyTurn)
             {
-                if (turnFinishAllowed)
-                {
-                    finishTurnCallback();
-                }
-                else
-                {
-                    StartCoroutine(sleep(1f, playCard));
-                }
+                makeTurn();
             } 
+        }
+
+        private void makeTurn()
+        {
+            if (turnFinishAllowed)
+            {
+                finishTurnCallback();
+            }
+            else
+            {
+                StartCoroutine(sleep(1f, playCard));
+            }
+        }
+        internal override void initGame(Game.PlayerID myPlayerID, GameObject cardPrefab, Action<Game.DiscardActionParameters> playCard, Action finishTurn, List<int> ordering)
+        {
+            base.initGame(myPlayerID, cardPrefab, playCard, finishTurn, ordering);
+
+            if (isMyTurn) StartCoroutine(sleep(5f, this.playCard));
         }
     }
 }

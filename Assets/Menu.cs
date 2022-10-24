@@ -7,6 +7,7 @@ using UnityEngine.UI;
 using Unity.Netcode;
 using Unity.Services.Authentication;
 using UnityEngine.SceneManagement;
+using Unity.Netcode.Transports.UTP;
 namespace Assets 
 {
     public class Menu : MonoBehaviour
@@ -35,7 +36,7 @@ namespace Assets
 
             localButton.onClick.AddListener(() =>
             {
-                NetworkManager.Singleton.StartHost();
+               
                 SceneManager.LoadScene("LocalGameScene");
             });
 
@@ -59,7 +60,7 @@ namespace Assets
                     switch (lobbyScreen.lobbyState)
                     {
                         case LobbyScreen.LobbyState.create:
-                            lobbyScreen.leaveLobby();
+                            // lobbyScreen.leaveLobby();
                             currentScreen = mainMenu.gameObject;
                             onScreenUpdate();
                             backButton.gameObject.SetActive(false);
@@ -75,6 +76,7 @@ namespace Assets
                         case LobbyScreen.LobbyState.waitingForHost:
                             popUpDialogue.OpenDialogue("Willst du die Lobby wirklich verlassen?", "Ja", "Nein", () =>
                             {
+                                NetworkManager.Singleton.Shutdown();
                                 lobbyScreen.leaveLobby();
                                 currentScreen = createNewJoinLobbyInstance().gameObject;
                                 onScreenUpdate();
@@ -91,12 +93,39 @@ namespace Assets
                     backButton.gameObject.SetActive(false);
                 }
             });
+
         }
 
         // Start is called before the first frame update
         private void Start()
         {
-            
+            NetworkManager.Singleton.GetComponent<NetworkConnection>().AddConnectCallback((clientId) =>
+            {
+                Debug.Log($"Client connected: {clientId}");
+                if (NetworkManager.Singleton.IsHost)
+                {
+                    if (NetworkManager.Singleton.ConnectedClients.Count == 2)
+                        lobbyScreen.lobbyState = LobbyScreen.LobbyState.ready;
+                }
+            });
+            NetworkManager.Singleton.GetComponent<NetworkConnection>().AddDisconnectCallback((clientId) =>
+            {
+                Debug.Log($"Client disconnected: {clientId}");
+                
+                if (NetworkManager.Singleton.IsHost)
+                {
+                    if (NetworkManager.Singleton.ConnectedClients.Count < 2)
+                    {
+                        lobbyScreen.lobbyState = LobbyScreen.LobbyState.waitingForClient;
+                    }
+                }
+                else
+                {
+                    lobbyScreen.lobbyState = LobbyScreen.LobbyState.create;
+                    currentScreen = createNewJoinLobbyInstance().gameObject;
+                    onScreenUpdate();
+                    }
+            });
         }
 
         // Update is called once per frame
@@ -122,9 +151,10 @@ namespace Assets
             }
             joinLobbyScreenInst = GameObject.Instantiate(joinLobbyScreenPrefab, transform);
             joinLobbyScreenInst.spinner = spinner;
-            joinLobbyScreenInst.onLobbyJoined = () =>
+            joinLobbyScreenInst.onLobbyJoined = (lobby) =>
             {
                 currentScreen = lobbyScreen.gameObject;
+                lobbyScreen.lobby = lobby;
                 lobbyScreen.lobbyState = LobbyScreen.LobbyState.waitingForHost;
                 onScreenUpdate();
             };

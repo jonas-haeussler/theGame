@@ -30,7 +30,7 @@ namespace Assets
             foreach(var go in Overlay.GetComponentsInChildren<Image>())
             {
                 color = go.color;
-                color.a = 0.8f;
+                color.a = 0.9f;
                 go.color = color;
             }
             color = Overlay.GetComponent<Image>().color;

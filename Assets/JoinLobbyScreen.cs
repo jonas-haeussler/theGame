@@ -26,7 +26,7 @@ namespace Assets
         [SerializeField] private GameObject noItemsFoundText;
         [SerializeField] private Button refreshButton;
 
-        internal Action onLobbyJoined;
+        internal Action<Lobby> onLobbyJoined;
 
         private List<GameObject> lobbiesUI;
 
@@ -72,9 +72,10 @@ namespace Assets
             {
                 GameObject.Destroy(child);
             }
+            lobbiesUI.Clear();
             spinner.SetActive(true);
-            if (!AuthenticationService.Instance.IsSignedIn)
-                await SignInAnonymouslyAsync();
+            AuthenticationService.Instance.SignOut();
+            await SignInAnonymouslyAsync();
             var lobbies = await QueryForLobbies();
             spinner.SetActive(false);
             foreach(Lobby lobby in lobbies)
@@ -93,7 +94,7 @@ namespace Assets
                         await LobbyService.Instance.JoinLobbyByIdAsync(lobby.Id);
                         await joinRelay(lobby);
                         startClient();
-                        onLobbyJoined();
+                        onLobbyJoined(lobby);
                         
                     }
                     catch (LobbyServiceException e)
