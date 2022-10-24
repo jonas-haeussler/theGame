@@ -8,11 +8,17 @@ using Unity.Services.Lobbies;
 using Unity.Services.Lobbies.Models;
 using Unity.Services.Authentication;
 using UnityEngine;
+using Unity.Services.Relay.Models;
+using TMPro;
 
 namespace Assets
 {
-    public abstract class OnlineMenuScreen : MenuScreen
+    public abstract class OnlineMenuScreen : MonoBehaviour
     {
+
+        [SerializeField] protected TextMeshProUGUI heading;
+
+        protected abstract void onInitFinished();
         async protected virtual void Start()
         {
             if(UnityServices.State != ServicesInitializationState.Initialized)
@@ -21,6 +27,7 @@ namespace Assets
                 Debug.Log(UnityServices.State);
                 SetupEvents();
             }
+            onInitFinished();
                 
         }
 
@@ -49,10 +56,13 @@ namespace Assets
                 Debug.Log("Player session could not be refreshed and expired.");
             };
         }
+
+        
         protected async Task SignInAnonymouslyAsync()
         {
             try
             {
+                AuthenticationService.Instance.ClearSessionToken();
                 await AuthenticationService.Instance.SignInAnonymouslyAsync();
                 Debug.Log("Sign in anonymously succeeded!");
 

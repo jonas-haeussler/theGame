@@ -14,7 +14,6 @@ namespace Assets
         [SerializeField] internal DiscardPile AscendingPile;
         [SerializeField] internal DiscardPile DescendingPile;
         
-        [SerializeField] protected GameObject CardArea;
 
         protected bool isMyTurn;
         protected bool turnFinishAllowed;
@@ -29,16 +28,11 @@ namespace Assets
 
         protected float cardPlayAnimTime;
 
-        protected bool init;
+        internal bool active;
 
 
-        internal virtual void initGame(Game.PlayerID myPlayerID, GameObject cardPrefab, Action<Game.DiscardActionParameters> playCard, Action finishTurn)
+        internal virtual void initGame(Game.PlayerID myPlayerID, GameObject cardPrefab, Action<Game.DiscardActionParameters> playCard, Action finishTurn, List<int> ordering)
         {
-            discardPiles = FindObjectsOfType<DiscardPile>().ToList();
-            foreach(var pile in discardPiles)
-            {
-                pile.InitPile(cardPrefab);
-            }
             this.PlayerID = myPlayerID;
 
             if (myPlayerID.Equals(Game.PlayerID.Player1))
@@ -51,9 +45,18 @@ namespace Assets
                 DescendingPile.Type = Game.PileType.Player2Descending;
                 AscendingPile.Type = Game.PileType.Player2Ascending;
             }
+            discardPiles = FindObjectsOfType<DiscardPile>().ToList();
+            foreach (var pile in discardPiles)
+            {
+                pile.InitPile(cardPrefab);
+            }
 
-            DrawPile.InitPile(cardPrefab);
+            DrawPile.InitPile(cardPrefab, ordering);
             Hand.initHand(cardPrefab.GetComponent<RectTransform>().sizeDelta.x);
+            foreach(var card in DrawPile.Cards)
+            {
+                card.color = PlayerID.Equals(Game.PlayerID.Player1) ? new Color(1, 0.8f, 0) : new Color(0.7f, 0.7f, 0.7f);
+            }
             if (myPlayerID.Equals(Game.PlayerID.Player1))
             {
                 isMyTurn = true;
@@ -66,7 +69,7 @@ namespace Assets
             playCardCallback = playCard;
             finishTurnCallback = finishTurn;
             gameObject.SetActive(true);
-            init = true;
+            active = true;
             drawCards(true);
         }
 
@@ -83,7 +86,7 @@ namespace Assets
 
                     var newCard = DrawPile.DrawCard();
                     var newPosition = Hand.GetNewCardPosition(drawAmount - i);
-                    newCard.transform.SetParent(CardArea.transform);
+                    newCard.transform.SetParent(Hand.gameObject.transform);
                     newCard.GetComponent<CustomAnimator>().AddAnimation(newPosition, .5f, true);
                     newCard.enabled = true;
                     Hand.UpdateRotations(drawAmount - i);
@@ -119,7 +122,6 @@ namespace Assets
 
         public virtual void TurnChanged(Game.Turn currentTurn)
         {
-            Debug.Log("Turn Changed!");
             if (isMyTurn && !currentTurn.PlayerID.Equals(PlayerID))
             {
                 drawCards(!enemyDiscard);
@@ -127,6 +129,8 @@ namespace Assets
             isMyTurn = currentTurn.PlayerID.Equals(PlayerID);
             var handCards = Hand.GetHandCards();
             if (isMyTurn) {
+                var playerIdNumber = PlayerID.Equals(Game.PlayerID.Player1) ? 1 : 2;
+                Debug.Log($"Handling turn change for Player {playerIdNumber}");
                 foreach (var discardAction in currentTurn.DiscardActionParameters)
                 { 
                     var card = handCards.Find(handCard => handCard.Number == discardAction.CardNumber);
@@ -141,6 +145,27 @@ namespace Assets
             }
             turnFinishAllowed = currentTurn.DiscardActionParameters.Count >= 2;
             enemyDiscard = currentTurn.enemyDiscard;
+        }
+
+        public bool HasTurnLeft()
+        {
+            if (turnFinishAllowed) return true;
+            foreach (var card in Hand.GetHandCards())
+            {
+                foreach (var pile in discardPiles)
+                {
+                    if (isValidTurn(pile.Cards[pile.Cards.Count - 1].Number, card.Number, pile.Type))
+                    {
+                        return true;
+                    }
+                }
+            }
+            return false;
+        }
+
+        public bool HasCardsLeft()
+        {
+            return DrawPile.Cards.Count > 0 || Hand.GetHandCards().Count > 0;
         }
 
     }

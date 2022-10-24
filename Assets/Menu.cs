@@ -4,65 +4,89 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
-
+using Unity.Netcode;
+using Unity.Services.Authentication;
+using UnityEngine.SceneManagement;
 namespace Assets 
 {
     public class Menu : MonoBehaviour
     {
+        [SerializeField] private Button localButton;
         [SerializeField] private Button createButton;
         [SerializeField] private Button joinButton;
         [SerializeField] private Button settingsButton;
         [SerializeField] private Button quitButton;
         [SerializeField] private Button backButton;
+        [SerializeField] private GameObject spinner;
 
-        [SerializeField] private MainMenuScreen mainMenu;
+        [SerializeField] private GameObject mainMenu;
         [SerializeField] private LobbyScreen lobbyScreen;
-        [SerializeField] private JoinLobbyScreen joinLobbyScreen;
+        [SerializeField] private JoinLobbyScreen joinLobbyScreenPrefab;
 
-        private MenuScreen currentScreen;
+        [SerializeField] private PopUpDialogue popUpDialogue;
+        private JoinLobbyScreen joinLobbyScreenInst;
 
+        private GameObject currentScreen;
 
-        private bool waitingForHost;
-        private bool waitingForClient;
 
         private void Awake()
         {
-            currentScreen = mainMenu;
+            currentScreen = mainMenu.gameObject;
+
+            localButton.onClick.AddListener(() =>
+            {
+                NetworkManager.Singleton.StartHost();
+                SceneManager.LoadScene("LocalGameScene");
+            });
+
             createButton.onClick.AddListener(() => {
 
-                currentScreen = lobbyScreen;
+                currentScreen = lobbyScreen.gameObject;
                 onScreenUpdate();
                 backButton.gameObject.SetActive(true);
             });
             joinButton.onClick.AddListener(() => {
-                currentScreen = joinLobbyScreen;
+                currentScreen = createNewJoinLobbyInstance().gameObject;
                 onScreenUpdate();
                 backButton.gameObject.SetActive(true);
+                // joinLobbyScreen.updateLobbyList();
             });
             backButton.onClick.AddListener(() =>
             {
-                if(currentScreen.Equals(lobbyScreen))
+                spinner.SetActive(false);
+                if(currentScreen.Equals(lobbyScreen.gameObject))
                 {
                     switch (lobbyScreen.lobbyState)
                     {
                         case LobbyScreen.LobbyState.create:
-                            currentScreen = mainMenu;
+                            lobbyScreen.leaveLobby();
+                            currentScreen = mainMenu.gameObject;
                             onScreenUpdate();
                             backButton.gameObject.SetActive(false);
                             break;
                         case LobbyScreen.LobbyState.waitingForClient:
-                            lobbyScreen.leaveLobby();
+                        case LobbyScreen.LobbyState.ready:
+                            popUpDialogue.OpenDialogue("Willst du die Lobby wirklich schließen?", "Ja", "Nein", () =>
+                            {
+                                NetworkManager.Singleton.Shutdown();
+                                lobbyScreen.leaveLobby();
+                            }); 
                             break;
                         case LobbyScreen.LobbyState.waitingForHost:
-                            lobbyScreen.leaveLobby();
-                            currentScreen = joinLobbyScreen;
-                            onScreenUpdate();
+                            popUpDialogue.OpenDialogue("Willst du die Lobby wirklich verlassen?", "Ja", "Nein", () =>
+                            {
+                                lobbyScreen.leaveLobby();
+                                currentScreen = createNewJoinLobbyInstance().gameObject;
+                                onScreenUpdate();
+                            });
                             break;
+
                     }
                 }
                 else
                 {
-                    currentScreen = mainMenu;
+                    AuthenticationService.Instance.SignOut();
+                    currentScreen = mainMenu.gameObject;
                     onScreenUpdate();
                     backButton.gameObject.SetActive(false);
                 }
@@ -85,8 +109,26 @@ namespace Assets
         {
             mainMenu.gameObject.SetActive(false);
             lobbyScreen.gameObject.SetActive(false);
-            joinLobbyScreen.gameObject.SetActive(false);
+            if(joinLobbyScreenInst != null)
+                joinLobbyScreenInst.gameObject.SetActive(false);
             currentScreen.gameObject.SetActive(true);
+        }
+
+        private JoinLobbyScreen createNewJoinLobbyInstance()
+        {
+            if (joinLobbyScreenInst != null)
+            {
+                GameObject.Destroy(joinLobbyScreenInst.gameObject);
+            }
+            joinLobbyScreenInst = GameObject.Instantiate(joinLobbyScreenPrefab, transform);
+            joinLobbyScreenInst.spinner = spinner;
+            joinLobbyScreenInst.onLobbyJoined = () =>
+            {
+                currentScreen = lobbyScreen.gameObject;
+                lobbyScreen.lobbyState = LobbyScreen.LobbyState.waitingForHost;
+                onScreenUpdate();
+            };
+            return joinLobbyScreenInst;
         }
     }
 }

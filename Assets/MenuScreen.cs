@@ -1,16 +1,42 @@
-﻿using System;
+using System.Collections;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using UnityEngine;
+using UnityEngine.UI;
 using TMPro;
+using Unity.Netcode;
+using UnityEngine.SceneManagement;
 
 namespace Assets
 {
-    public abstract class MenuScreen : MonoBehaviour
+    public class MenuScreen : MonoBehaviour
     {
-        [SerializeField] protected TextMeshProUGUI heading;
 
+
+        [SerializeField] private Button continueButton;
+        [SerializeField] private Button menuButton;
+        [SerializeField] private Button quitButton;
+        // Start is called before the first frame update
+        void Start()
+        {
+            continueButton.onClick.AddListener(() =>
+            {
+                gameObject.SetActive(false);
+            });
+            menuButton.onClick.AddListener(() =>
+            {
+                NetworkManager.Singleton.Shutdown();
+                SceneManager.LoadScene("MenuScene");
+            });
+            quitButton.onClick.AddListener(() =>
+            {
+
+            });
+        }
+
+        // Update is called once per frame
+        void Update()
+        {
+
+        }
     }
 }

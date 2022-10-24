@@ -3,12 +3,14 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
+using TMPro;
 
 namespace Assets
 {
     public class LocalPlayer : Player
     {
-        [SerializeField] private Button TurnFinishedButton;
+        [SerializeField] private Button turnFinishedButton;
+        [SerializeField] private TextMeshProUGUI turnText;
         private Card dragObject;
 
         private int oldSiblingIndex;
@@ -22,16 +24,35 @@ namespace Assets
         // Update is called once per frame
         protected void Update()
         {
-            if (!init) return;
-            var scaleFactor = CardArea.GetComponentInParent<Canvas>().scaleFactor;
+            if (!active) return;
+            if (isMyTurn) turnText.text = "Du bist am Zug!";
+            else turnText.text = "Dein Gegner ist am Zug!";
+            var scaleFactor = Hand.GetComponentInParent<Canvas>().scaleFactor;
             var handCards = Hand.GetHandCards();
             foreach (var card in handCards) card.Hidden = false;
 
+            
+            var imColor = turnFinishedButton.GetComponent<Image>().color;
+            var textColor = turnFinishedButton.GetComponentInChildren<TextMeshProUGUI>().color;
+            float alpha;
+            if (turnFinishedButton.enabled)
+            {
+                alpha = 1f;
+            }
+            else
+            {
+                alpha = 0.4f;
+            }
+            imColor.a = alpha;
+            textColor.a = alpha;
+            turnFinishedButton.GetComponent<Image>().color = imColor;
+            turnFinishedButton.GetComponentInChildren<TextMeshProUGUI>().color = textColor;
+
             if (isMyTurn)
             {
-                if (turnFinishAllowed) TurnFinishedButton.enabled = true;
+                if (turnFinishAllowed) turnFinishedButton.enabled = true;
                
-                else TurnFinishedButton.enabled = false;
+                else turnFinishedButton.enabled = false;
                 
                 foreach (Touch touch in Input.touches)
                 {
@@ -48,13 +69,17 @@ namespace Assets
                             var touchPosition = touch.position;
                             if (boundingRect.Contains(touchPosition))
                             {
+                                foreach (var pile in discardPiles)
+                                {
+                                    pile.SetEnabled();
+                                }
                                 dragObject = handCard;
                             }
                         }
                         if(dragObject != null)
                         {
                             oldSiblingIndex = dragObject.transform.GetSiblingIndex();
-                            dragObject.transform.SetParent(CardArea.GetComponentInParent<Canvas>().transform);
+                            dragObject.transform.SetParent(Hand.GetComponentInParent<Canvas>().transform);
                         }
 
                     }
@@ -64,7 +89,6 @@ namespace Assets
                         dragObject.transform.localRotation = Quaternion.Euler(0, 0, 0);
                         dragObject.isDragging = true;
                         int indexInHand = Hand.GetCardIndexFromPosition(dragObject.transform.position);
-                        Debug.Log(indexInHand);
                         if (indexInHand != -1 && !Hand.GetHandCards()[indexInHand].Equals(dragObject)) 
                         {
                             dragObject.transform.SetParent(Hand.transform);
@@ -75,6 +99,10 @@ namespace Assets
                     }
                     else if (touch.phase == TouchPhase.Ended && dragObject != null)
                     {
+                        foreach (var pile in discardPiles)
+                        {
+                            pile.SetDisabled();
+                        }
                         bool filed = false;
                         foreach (var pile in discardPiles)
                         {
@@ -105,13 +133,13 @@ namespace Assets
             }
             else
             {
-                TurnFinishedButton.enabled = false;
+                turnFinishedButton.enabled = false;
             }
         }
-        internal override void initGame(Game.PlayerID myPlayerID, GameObject cardPrefab, Action<Game.DiscardActionParameters> playCard, Action finishTurn)
+        internal override void initGame(Game.PlayerID myPlayerID, GameObject cardPrefab, Action<Game.DiscardActionParameters> playCard, Action finishTurn, List<int> ordering)
         {
-            base.initGame(myPlayerID, cardPrefab, playCard, finishTurn);
-            TurnFinishedButton.onClick.AddListener(() =>
+            base.initGame(myPlayerID, cardPrefab, playCard, finishTurn, ordering);
+            turnFinishedButton.onClick.AddListener(() =>
             {
                 finishTurn();
             });

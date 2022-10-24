@@ -3,51 +3,57 @@
     "m_SelectedPackage": {
         "deviceId": "574dce5e9804",
         "name": "com.DefaultCompany.TheGame",
-        "processId": 13486,
+        "processId": 17096,
         "exited": false
     },
     "m_SelectedPriority": 0,
     "m_KnownPackagesForSerialization": [
         {
             "deviceId": "574dce5e9804",
-            "name": "com.DefaultCompany.TheGame",
-            "processId": 4708,
-            "exited": true
-        },
-        {
-            "deviceId": "574dce5e9804",
-            "name": "com.DefaultCompany.TheGame",
-            "processId": 6517,
-            "exited": true
-        },
-        {
-            "deviceId": "574dce5e9804",
-            "name": "com.DefaultCompany.TheGame",
-            "processId": 11375,
-            "exited": true
-        },
-        {
-            "deviceId": "574dce5e9804",
-            "name": "com.DefaultCompany.TheGame",
-            "processId": 12120,
-            "exited": true
-        },
-        {
-            "deviceId": "574dce5e9804",
-            "name": "com.DefaultCompany.TheGame",
-            "processId": 12918,
-            "exited": true
-        },
-        {
-            "deviceId": "574dce5e9804",
-            "name": "com.DefaultCompany.TheGame",
-            "processId": 13258,
+            "name": "com.whatsapp",
+            "processId": 25941,
             "exited": false
         },
         {
             "deviceId": "574dce5e9804",
             "name": "com.DefaultCompany.TheGame",
-            "processId": 13486,
+            "processId": 5614,
+            "exited": true
+        },
+        {
+            "deviceId": "574dce5e9804",
+            "name": "com.DefaultCompany.TheGame",
+            "processId": 6309,
+            "exited": true
+        },
+        {
+            "deviceId": "574dce5e9804",
+            "name": "com.DefaultCompany.TheGame",
+            "processId": 6935,
+            "exited": true
+        },
+        {
+            "deviceId": "574dce5e9804",
+            "name": "com.DefaultCompany.TheGame",
+            "processId": 9279,
+            "exited": true
+        },
+        {
+            "deviceId": "574dce5e9804",
+            "name": "com.DefaultCompany.TheGame",
+            "processId": 10334,
+            "exited": true
+        },
+        {
+            "deviceId": "574dce5e9804",
+            "name": "com.DefaultCompany.TheGame",
+            "processId": 11288,
+            "exited": false
+        },
+        {
+            "deviceId": "574dce5e9804",
+            "name": "com.DefaultCompany.TheGame",
+            "processId": 17096,
             "exited": false
         }
     ],

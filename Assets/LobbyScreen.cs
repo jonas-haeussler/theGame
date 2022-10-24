@@ -7,7 +7,13 @@ using Unity.Services.Core;
 using Unity.Services.Lobbies;
 using Unity.Services.Lobbies.Models;
 using Unity.Services.Authentication;
+using Unity.Netcode;
 using System;
+using UnityEngine.SceneManagement;
+using System.Threading.Tasks;
+using Unity.Netcode.Transports.UTP;
+using Unity.Services.Relay;
+using Unity.Services.Relay.Models;
 
 namespace Assets
 {
@@ -25,7 +31,11 @@ namespace Assets
 
         internal LobbyState lobbyState;
 
+        private float pollTime;
+
         private Lobby lobby;
+
+        private Allocation allocation;
 
         private void Awake()
         {
@@ -33,32 +43,72 @@ namespace Assets
 
             createButton.onClick.AddListener(async () =>
             {
+                IEnumerator animateText()
+                {
+                    string prefix = "Lobby eröffnen";
+                    while (true)
+                    {
+                        string text = createButton.GetComponentInChildren<TextMeshProUGUI>().text;
+                        if (text.Equals("Erstellen"))
+                            text = prefix + ".";
+                        else if (text.Equals(prefix + "."))
+                            text = prefix + "..";
+                        else if (text.Equals(prefix + ".."))
+                            text = prefix + "...";
+                        else if (text.Equals(prefix + "..."))
+                            text = prefix + ".";
+                        createButton.GetComponentInChildren<TextMeshProUGUI>().text = text;
+                        yield return new WaitForSeconds(0.4f);
+                    }
+                }
                 if (lobbyName.text.Equals(""))
                 {
                     Debug.Log("Lobbyname empty");
                     return;
                 }
-                if(!AuthenticationService.Instance.IsAuthorized)
+                createButton.interactable = false;
+                StartCoroutine(animateText());
+                if(!AuthenticationService.Instance.IsSignedIn)
                     await SignInAnonymouslyAsync();
                 int maxPlayers = 2;
                 CreateLobbyOptions options = new CreateLobbyOptions();
                 options.IsPrivate = visibilityToggle.isPrivate;
                 lobby = await LobbyService.Instance.CreateLobbyAsync(lobbyName.text, maxPlayers, options);
+                await addRelayInfo(lobby.Id);
+                // var dtlsEndpoint = allocation.ServerEndpoints.Find(e => e.ConnectionType == "dtls");
+                // string ipv4address = dtlsEndpoint.Host;
+                // int port = dtlsEndpoint.Port;
+
+                NetworkManager.Singleton.GetComponent<UnityTransport>().SetRelayServerData(allocation.RelayServer.IpV4,
+                                                                                          (ushort)allocation.RelayServer.Port,
+                                                                                         allocation.AllocationIdBytes,
+                                                                                         allocation.Key,
+                                                                                         allocation.ConnectionData);
+                NetworkManager.Singleton.StartHost();
+                StopAllCoroutines();
+                Debug.Log("Host started");
+                
                 lobbyState = LobbyState.waitingForClient;
+                createButton.GetComponentInChildren<TextMeshProUGUI>().text = "Erstellen";
+                createButton.interactable = true;
+            });
+            gamestartButton.onClick.AddListener(() =>
+            {
+                NetworkManager.Singleton.SceneManager.LoadScene("GameScene", LoadSceneMode.Single);
+
             });
 
         }
-        // Start is called before the first frame update
-        protected override void Start()
+
+        protected override void onInitFinished()
         {
-            base.Start();
-
-
+            return;
         }
 
         // Update is called once per frame
         void Update()
         {
+            pollTime += Time.deltaTime;
             switch(lobbyState)
             {
                 case LobbyState.create:
@@ -76,10 +126,27 @@ namespace Assets
                     lobbyName.gameObject.SetActive(false);
                     gamestartButton.gameObject.SetActive(false);
                     spinner.SetActive(true);
-                    if (lobby.Players.Count == 2)
-                        lobbyState = LobbyState.ready;
+                    if(pollTime > 2)
+                    {
+                        int clientCount = NetworkManager.Singleton.ConnectedClients.Count;
+                        Debug.Log($"Poll clientCount: {clientCount}");
+                        pollTime = 0;
+                        if (clientCount == 2)
+                        {
+                            Debug.Log("Client connected!");
+
+                            lobbyState = LobbyState.ready;
+                        }
+
+                    }
                     break;
                 case LobbyState.waitingForHost:
+                    heading.text = "Warten auf Host für Spielstart";
+                    createButton.gameObject.SetActive(false);
+                    visibilityToggle.gameObject.SetActive(false);
+                    lobbyName.gameObject.SetActive(false);
+                    gamestartButton.gameObject.SetActive(false);
+                    spinner.SetActive(true);
                     break;
                 case LobbyState.ready:
                     heading.text = "Spieler gefunden!";
@@ -92,26 +159,87 @@ namespace Assets
             }
 
         }
+
+        private void OnDisable()
+        {
+            createButton.GetComponentInChildren<TextMeshProUGUI>().text = "Erstellen";
+        }
+
+        private async Task addRelayInfo(string lobbyId)
+        {
+            try
+            {
+                // Request list of valid regions
+                var regionList = await RelayService.Instance.ListRegionsAsync();
+
+                // pick a region from the list
+                foreach(var region in regionList)
+                {
+                    Debug.Log(region.Description);
+                }
+                var targetRegion = regionList[1].Id;
+
+                // Request an allocation to the Relay service
+                // with a maximum of 5 peer connections, for a maximum of 6 players.
+                var relayMaxConnections = 2;
+                allocation = await Relay.Instance.CreateAllocationAsync(relayMaxConnections, targetRegion);
+                Debug.Log($"Allocation created: {allocation.AllocationId}");
+
+
+                // Request the join code to the Relay service
+                var joinCode = await Relay.Instance.GetJoinCodeAsync(allocation.AllocationId);
+                UpdateLobbyOptions options = new UpdateLobbyOptions();
+
+                //Ensure you sign-in before calling Authentication Instance
+                //See IAuthenticationService interface
+                options.HostId = AuthenticationService.Instance.PlayerId;
+
+                options.Data = new Dictionary<string, DataObject>()
+                   {
+                       {
+                           "JoinCode", new DataObject(
+                               visibility: DataObject.VisibilityOptions.Public,
+                               value: joinCode)
+                       }
+                   };
+
+                var lobby = await LobbyService.Instance.UpdateLobbyAsync(lobbyId, options);
+                Debug.Log($"JoinCode added to Lobby: {joinCode}");
+
+            }
+            catch (LobbyServiceException e)
+            {
+                Debug.Log(e);
+            }
+            catch (RelayServiceException e)
+            {
+                Debug.Log(e);
+            }
+
+        }
         public async void leaveLobby()
         {
-            if (lobbyState.Equals(LobbyState.waitingForClient))
+            try
             {
-                await LobbyService.Instance.DeleteLobbyAsync(lobby.Id);
-            }
-            else
+                if (lobby != null)
+                {
+                    if (lobbyState.Equals(LobbyState.waitingForClient))
+                    {
+                        await LobbyService.Instance.DeleteLobbyAsync(lobby.Id);
+                    }
+                    else
+                    {
+
+                        string playerId = AuthenticationService.Instance.PlayerId;
+                        await LobbyService.Instance.RemovePlayerAsync(lobby.Id, playerId);
+                    }
+                }
+            } catch(LobbyServiceException e)
             {
-                try
-                {
-                    //Ensure you sign-in before calling Authentication Instance
-                    //See IAuthenticationService interface
-                    string playerId = AuthenticationService.Instance.PlayerId;
-                    await LobbyService.Instance.RemovePlayerAsync("lobbyId", playerId);
-                }
-                catch (LobbyServiceException e)
-                {
-                    Debug.Log(e);
-                }
+                Debug.Log(e);
             }
+            if(AuthenticationService.Instance.IsSignedIn)
+                AuthenticationService.Instance.SignOut();
             lobbyState = LobbyState.create;
 
         }

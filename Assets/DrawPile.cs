@@ -20,13 +20,12 @@ namespace Assets
             
         }
 
-        public void InitPile(GameObject cardPrefab)
+        public void InitPile(GameObject cardPrefab, List<int> cardOrdering)
         {
-            System.Random rng = new System.Random();
-            List<int> numbers = Enumerable.Range(2, 58).OrderBy(a => rng.Next()).ToList();
+
             Cards = new List<Card>();
             int counter = 0;
-            foreach(int number in numbers)
+            foreach(int number in cardOrdering)
             {
                 var go = GameObject.Instantiate(cardPrefab, transform);
                 go.transform.position += new Vector3(go.GetComponentInParent<Canvas>().scaleFactor * counter * 0.2f, go.GetComponentInParent<Canvas>().scaleFactor * counter * 0.2f, 0);
