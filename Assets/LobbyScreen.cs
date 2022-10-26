@@ -28,6 +28,8 @@ namespace Assets
         [SerializeField] private TMP_InputField lobbyName;
         [SerializeField] private VisibilityToggleGroup visibilityToggle;
         [SerializeField] private GameObject spinner;
+        [SerializeField] private TMP_InputField lobbyCodeText;
+        [SerializeField] private ShareButton shareButton;
 
         internal LobbyState lobbyState;
 
@@ -35,6 +37,8 @@ namespace Assets
         internal Lobby lobby;
 
         private Allocation allocation;
+
+        private float pollTime;
 
         private void Awake()
         {
@@ -86,16 +90,19 @@ namespace Assets
                 NetworkManager.Singleton.StartHost();
                 StopAllCoroutines();
                 Debug.Log("Host started");
-                
+
+                shareButton.joinCode = lobby.LobbyCode;
                 lobbyState = LobbyState.waitingForClient;
                 createButton.GetComponentInChildren<TextMeshProUGUI>().text = "Erstellen";
                 createButton.interactable = true;
+                lobbyCodeText.text = lobby.LobbyCode;
             });
             gamestartButton.onClick.AddListener(() =>
             {
                 NetworkManager.Singleton.SceneManager.LoadScene("GameScene", LoadSceneMode.Single);
 
             });
+
 
         }
 
@@ -107,7 +114,7 @@ namespace Assets
         
 
         // Update is called once per frame
-        void Update()
+        async void Update()
         {
             switch(lobbyState)
             {
@@ -118,6 +125,7 @@ namespace Assets
                     lobbyName.gameObject.SetActive(true);
                     gamestartButton.gameObject.SetActive(false);
                     spinner.SetActive(false);
+                    lobbyCodeText.gameObject.SetActive(false);
                     break;
                 case LobbyState.waitingForClient:
                     heading.text = "Warten auf Spieler für " + lobbyName.text;
@@ -126,6 +134,15 @@ namespace Assets
                     lobbyName.gameObject.SetActive(false);
                     gamestartButton.gameObject.SetActive(false);
                     spinner.SetActive(true);
+                    lobbyCodeText.gameObject.SetActive(true);
+                    if (pollTime > 15)
+                    {
+                        pollTime = 0;
+                        await LobbyService.Instance.SendHeartbeatPingAsync(lobby.Id);
+                        Debug.Log($"Sending Heartbeat for lobby: {lobby.Id}"); 
+                    }
+                    pollTime += Time.deltaTime;
+
                     break;
                 case LobbyState.waitingForHost:
                     heading.text = "Warten auf Host für Spielstart";
@@ -134,6 +151,7 @@ namespace Assets
                     lobbyName.gameObject.SetActive(false);
                     gamestartButton.gameObject.SetActive(false);
                     spinner.SetActive(true);
+                    lobbyCodeText.gameObject.SetActive(false);
                     break;
                 case LobbyState.ready:
                     heading.text = "Spieler gefunden!";
@@ -142,6 +160,7 @@ namespace Assets
                     lobbyName.gameObject.SetActive(false);
                     gamestartButton.gameObject.SetActive(true);
                     spinner.SetActive(false);
+                    lobbyCodeText.gameObject.SetActive(false);
                     break;
             }
 
@@ -160,10 +179,6 @@ namespace Assets
                 var regionList = await RelayService.Instance.ListRegionsAsync();
 
                 // pick a region from the list
-                foreach(var region in regionList)
-                {
-                    Debug.Log(region.Description);
-                }
                 var targetRegion = regionList[1].Id;
 
                 // Request an allocation to the Relay service

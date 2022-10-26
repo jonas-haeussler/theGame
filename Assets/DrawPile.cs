@@ -4,15 +4,17 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using UnityEngine;
+using TMPro;
 
 namespace Assets
 {
     public class DrawPile : MonoBehaviour
     {
+        [SerializeField] private TextMeshProUGUI countText;
         internal List<Card> Cards;
         private void Start()
         {
-            
+
         }
 
         private void Update()
@@ -35,12 +37,15 @@ namespace Assets
                 Cards.Add(card);
                 counter++;
             }
+            countText.text = Cards.Count.ToString();
         }
 
         public Card DrawCard()
         {
             Card top = Cards[0];
             Cards.RemoveAt(0);
+            countText.text = Cards.Count.ToString();
+            countText.transform.SetAsLastSibling();
             return top;
         }
     }

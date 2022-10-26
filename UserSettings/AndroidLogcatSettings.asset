@@ -3,57 +3,57 @@
     "m_SelectedPackage": {
         "deviceId": "574dce5e9804",
         "name": "com.DefaultCompany.TheGame",
-        "processId": 17096,
+        "processId": 24671,
         "exited": false
     },
     "m_SelectedPriority": 0,
     "m_KnownPackagesForSerialization": [
         {
             "deviceId": "574dce5e9804",
-            "name": "com.whatsapp",
-            "processId": 25941,
+            "name": "com.google.android.apps.nexuslauncher",
+            "processId": 2862,
             "exited": false
         },
         {
             "deviceId": "574dce5e9804",
             "name": "com.DefaultCompany.TheGame",
-            "processId": 5614,
+            "processId": 20939,
             "exited": true
         },
         {
             "deviceId": "574dce5e9804",
             "name": "com.DefaultCompany.TheGame",
-            "processId": 6309,
+            "processId": 21239,
             "exited": true
         },
         {
             "deviceId": "574dce5e9804",
             "name": "com.DefaultCompany.TheGame",
-            "processId": 6935,
+            "processId": 22022,
             "exited": true
         },
         {
             "deviceId": "574dce5e9804",
             "name": "com.DefaultCompany.TheGame",
-            "processId": 9279,
+            "processId": 22180,
             "exited": true
         },
         {
             "deviceId": "574dce5e9804",
             "name": "com.DefaultCompany.TheGame",
-            "processId": 10334,
+            "processId": 22329,
             "exited": true
         },
         {
             "deviceId": "574dce5e9804",
             "name": "com.DefaultCompany.TheGame",
-            "processId": 11288,
+            "processId": 22671,
             "exited": false
         },
         {
             "deviceId": "574dce5e9804",
             "name": "com.DefaultCompany.TheGame",
-            "processId": 17096,
+            "processId": 24671,
             "exited": false
         }
     ],

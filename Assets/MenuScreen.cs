@@ -1,5 +1,6 @@
 using System.Collections;
 using System.Collections.Generic;
+using System;
 using UnityEngine;
 using UnityEngine.UI;
 using TMPro;
@@ -15,6 +16,8 @@ namespace Assets
         [SerializeField] private Button continueButton;
         [SerializeField] private Button menuButton;
         [SerializeField] private Button quitButton;
+
+        internal Action menuAction;
         // Start is called before the first frame update
         void Start()
         {
@@ -24,8 +27,7 @@ namespace Assets
             });
             menuButton.onClick.AddListener(() =>
             {
-                NetworkManager.Singleton.Shutdown();
-                SceneManager.LoadScene("MenuScene");
+                menuAction.Invoke();
             });
             quitButton.onClick.AddListener(() =>
             {

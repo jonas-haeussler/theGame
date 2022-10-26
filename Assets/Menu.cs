@@ -104,8 +104,7 @@ namespace Assets
                 Debug.Log($"Client connected: {clientId}");
                 if (NetworkManager.Singleton.IsHost)
                 {
-                    if (NetworkManager.Singleton.ConnectedClients.Count == 2)
-                        lobbyScreen.lobbyState = LobbyScreen.LobbyState.ready;
+                    lobbyScreen.lobbyState = LobbyScreen.LobbyState.ready;
                 }
             });
             NetworkManager.Singleton.GetComponent<NetworkConnection>().AddDisconnectCallback((clientId) =>
@@ -114,24 +113,47 @@ namespace Assets
                 
                 if (NetworkManager.Singleton.IsHost)
                 {
-                    if (NetworkManager.Singleton.ConnectedClients.Count < 2)
+                    popUpDialogue.OpenDialogue("Dein Mitspieler hat die Lobby verlassen.", "OK", () =>
                     {
                         lobbyScreen.lobbyState = LobbyScreen.LobbyState.waitingForClient;
-                    }
+                    });
                 }
                 else
                 {
-                    lobbyScreen.lobbyState = LobbyScreen.LobbyState.create;
-                    currentScreen = createNewJoinLobbyInstance().gameObject;
-                    onScreenUpdate();
-                    }
+                    popUpDialogue.OpenDialogue("Der Host hat die Lobby verlassen.", "OK", () =>
+                    {
+                        lobbyScreen.lobbyState = LobbyScreen.LobbyState.create;
+                        currentScreen = createNewJoinLobbyInstance().gameObject;
+                        onScreenUpdate();
+                    });
+                }
             });
+            if(ProcessDeepLinkMngr.Instance.joinCode != null && !ProcessDeepLinkMngr.Instance.joinCode.Equals(""))
+            {
+                ProcessDeepLinkMngr.Instance.onWrongLink = () =>
+                {
+                    Debug.Log("Hier");
+                    popUpDialogue.OpenDialogue("Eine Lobby mit diesem Code wurde nicht gefunden!", "OK", () =>
+                    {
+                        AuthenticationService.Instance.SignOut();
+                        currentScreen = mainMenu.gameObject;
+                        onScreenUpdate();
+                        backButton.gameObject.SetActive(false);
+                    });
+                };
+                currentScreen = createNewJoinLobbyInstance().gameObject;
+                onScreenUpdate();
+                backButton.gameObject.SetActive(true);
+            }
         }
 
         // Update is called once per frame
         void Update()
         {
-        
+            if(ProcessDeepLinkMngr.Instance.joinCode != null && !ProcessDeepLinkMngr.Instance.joinCode.Equals(""))
+            {
+                SceneManager.LoadScene("MenuScene");
+            }
         }
 
         private void onScreenUpdate()
@@ -158,6 +180,11 @@ namespace Assets
                 lobbyScreen.lobbyState = LobbyScreen.LobbyState.waitingForHost;
                 onScreenUpdate();
             };
+            joinLobbyScreenInst.onWrongCodeInserted = () =>
+            {
+                popUpDialogue.OpenDialogue("Eine Lobby mit diesem Code wurde nicht gefunden!", "OK");
+            };
+            joinLobbyScreenInst.transform.SetAsFirstSibling();
             return joinLobbyScreenInst;
         }
     }

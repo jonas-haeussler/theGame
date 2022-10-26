@@ -25,8 +25,13 @@ namespace Assets
         [SerializeField] private GameObject lobbyBorder;
         [SerializeField] private GameObject noItemsFoundText;
         [SerializeField] private Button refreshButton;
+        [SerializeField] private TMP_InputField codeInput;
+        [SerializeField] private Button privateJoinButton;
 
         internal Action<Lobby> onLobbyJoined;
+
+        internal Action onWrongCodeInserted;
+
 
         private List<GameObject> lobbiesUI;
 
@@ -35,8 +40,26 @@ namespace Assets
         private void Awake()
         {
             lobbiesUI = new List<GameObject>();
+            privateJoinButton.onClick.AddListener(async () =>
+            {
+                try 
+                {
+                    AuthenticationService.Instance.SignOut();
+                    await SignInAnonymouslyAsync();
+                    var lobby = await LobbyService.Instance.JoinLobbyByCodeAsync(codeInput.text);
+                    await joinRelay(lobby);
+                    startClient();
+                    onLobbyJoined(lobby);
+                    codeInput.text = "";
+                }
+                catch (LobbyServiceException e)
+                {
+                    if (e.ErrorCode == 16000 || e.ErrorCode == 16001) onWrongCodeInserted.Invoke();
+                }
+            });
+
         }
-        protected override void onInitFinished()
+        protected async override void onInitFinished()
         {
             heading.text = "Spiel beitreten";
             updateLobbyList();
@@ -58,6 +81,24 @@ namespace Assets
                 updateLobbyList();
 
             });
+            if(ProcessDeepLinkMngr.Instance.joinCode != null && !ProcessDeepLinkMngr.Instance.joinCode.Equals(""))
+            {
+                string joinCode = ProcessDeepLinkMngr.Instance.joinCode;
+                ProcessDeepLinkMngr.Instance.joinCode = "";
+                try
+                {
+                    AuthenticationService.Instance.SignOut();
+                    await SignInAnonymouslyAsync();
+                    var lobby = await LobbyService.Instance.JoinLobbyByCodeAsync(joinCode);
+                    await joinRelay(lobby);
+                    startClient();
+                    onLobbyJoined(lobby);
+                } 
+                catch(LobbyServiceException e)
+                {
+                    if (e.ErrorCode == 16000 || e.ErrorCode == 16001) ProcessDeepLinkMngr.Instance.onWrongLink.Invoke();
+                }
+            }
         }
 
         // Update is called once per frame

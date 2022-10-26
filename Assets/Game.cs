@@ -66,6 +66,15 @@ namespace Assets {
                 RemotePlayer.active = menuScreen.gameObject.activeInHierarchy;
                 
             });
+            menuScreen.menuAction = () =>
+            {
+                popUpDialogue.OpenDialogue("Möchtest du wirklich das Spiel verlassen?", "Ja", "Nein", () =>
+                {
+                    NetworkManager.Singleton.Shutdown();
+                    SceneManager.LoadScene("MenuScene");
+                });
+            };
+            NetworkManager.Singleton.GetComponent<NetworkConnection>().ClearDisconnectCallbacks();
             NetworkManager.Singleton.GetComponent<NetworkConnection>().AddDisconnectCallback((clientId) =>
             {
                 popUpDialogue.OpenDialogue("Dein Gegner hat das Spiel verlassen. Möchtest du zum Menu zurückkehren?", "Ja", "Nein", () =>
@@ -127,6 +136,11 @@ namespace Assets {
                     LocalPlayer.active = true;
                     RemotePlayer.active = true;
                 }
+            }
+
+            if (ProcessDeepLinkMngr.Instance.joinCode != null && !ProcessDeepLinkMngr.Instance.joinCode.Equals(""))
+            {
+                SceneManager.LoadScene("MenuScene");
             }
         }
         [ClientRpc]
@@ -409,11 +423,6 @@ namespace Assets {
         private void onReplayConfirmServerRpc()
         {
             NetworkManager.SceneManager.LoadScene("GameScene", UnityEngine.SceneManagement.LoadSceneMode.Single);
-        }
-
-        private void Tick()
-        {
-            Debug.Log($"Tick: {NetworkManager.LocalTime.Tick}");
         }
 
     }
