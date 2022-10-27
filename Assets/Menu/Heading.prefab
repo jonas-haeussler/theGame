@@ -34,7 +34,7 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0.5, y: 0.5}
   m_AnchorMax: {x: 0.5, y: 0.5}
-  m_AnchoredPosition: {x: 0, y: -140}
+  m_AnchoredPosition: {x: 0, y: -50}
   m_SizeDelta: {x: 700, y: 120}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!222 &4834490174270053702
@@ -67,8 +67,8 @@ MonoBehaviour:
       m_Calls: []
   m_text: Neues Spiel erstellen
   m_isRightToLeft: 0
-  m_fontAsset: {fileID: 11400000, guid: 0721de14e6d42aa4bba74e1af96ae09e, type: 2}
-  m_sharedMaterial: {fileID: 3731291824425652605, guid: 0721de14e6d42aa4bba74e1af96ae09e, type: 2}
+  m_fontAsset: {fileID: 11400000, guid: e07f49a0282d0ef4382388aa5b44ea0b, type: 2}
+  m_sharedMaterial: {fileID: 4292659085019268148, guid: e07f49a0282d0ef4382388aa5b44ea0b, type: 2}
   m_fontSharedMaterials: []
   m_fontMaterial: {fileID: 0}
   m_fontMaterials: []

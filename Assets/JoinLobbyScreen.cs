@@ -84,6 +84,10 @@ namespace Assets
             if(ProcessDeepLinkMngr.Instance.joinCode != null && !ProcessDeepLinkMngr.Instance.joinCode.Equals(""))
             {
                 string joinCode = ProcessDeepLinkMngr.Instance.joinCode;
+                foreach(Transform child in transform)
+                {
+                    transform.gameObject.SetActive(false);
+                }
                 ProcessDeepLinkMngr.Instance.joinCode = "";
                 try
                 {

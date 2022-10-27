@@ -3,7 +3,7 @@
     "m_SelectedPackage": {
         "deviceId": "574dce5e9804",
         "name": "com.DefaultCompany.TheGame",
-        "processId": 24671,
+        "processId": 25022,
         "exited": false
     },
     "m_SelectedPriority": 0,
@@ -54,6 +54,12 @@
             "deviceId": "574dce5e9804",
             "name": "com.DefaultCompany.TheGame",
             "processId": 24671,
+            "exited": false
+        },
+        {
+            "deviceId": "574dce5e9804",
+            "name": "com.DefaultCompany.TheGame",
+            "processId": 25022,
             "exited": false
         }
     ],

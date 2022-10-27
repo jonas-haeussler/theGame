@@ -67,8 +67,8 @@ MonoBehaviour:
       m_Calls: []
   m_text: Spiel erstellen
   m_isRightToLeft: 0
-  m_fontAsset: {fileID: 11400000, guid: af2e7de8d4799f942bb2a9c3696aa82e, type: 2}
-  m_sharedMaterial: {fileID: -875524696333987651, guid: af2e7de8d4799f942bb2a9c3696aa82e, type: 2}
+  m_fontAsset: {fileID: 11400000, guid: c06760088ee92424993bf8dfda6d59ce, type: 2}
+  m_sharedMaterial: {fileID: -374211385897340031, guid: c06760088ee92424993bf8dfda6d59ce, type: 2}
   m_fontSharedMaterials: []
   m_fontMaterial: {fileID: 0}
   m_fontMaterials: []
@@ -92,8 +92,8 @@ MonoBehaviour:
   m_faceColor:
     serializedVersion: 2
     rgba: 4294967295
-  m_fontSize: 40
-  m_fontSizeBase: 40
+  m_fontSize: 45
+  m_fontSizeBase: 45
   m_fontWeight: 400
   m_enableAutoSizing: 0
   m_fontSizeMin: 18
@@ -201,7 +201,7 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_Sprite: {fileID: 21300000, guid: 2804ff85ddb41b246a83df10d21f9514, type: 3}
+  m_Sprite: {fileID: 21300000, guid: 4f7d9ae036c629d47a73cbf4678ff36f, type: 3}
   m_Type: 0
   m_PreserveAspect: 0
   m_FillCenter: 1

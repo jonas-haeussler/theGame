@@ -158,6 +158,7 @@ namespace Assets
 
         private void onScreenUpdate()
         {
+            Debug.Log("Hier");
             mainMenu.gameObject.SetActive(false);
             lobbyScreen.gameObject.SetActive(false);
             if(joinLobbyScreenInst != null)

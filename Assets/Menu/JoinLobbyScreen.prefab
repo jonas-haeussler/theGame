@@ -67,8 +67,8 @@ MonoBehaviour:
       m_Calls: []
   m_text: "\u200B"
   m_isRightToLeft: 0
-  m_fontAsset: {fileID: 11400000, guid: af2e7de8d4799f942bb2a9c3696aa82e, type: 2}
-  m_sharedMaterial: {fileID: -875524696333987651, guid: af2e7de8d4799f942bb2a9c3696aa82e, type: 2}
+  m_fontAsset: {fileID: 11400000, guid: d5094eff82dad9644992504adbafcff2, type: 2}
+  m_sharedMaterial: {fileID: -4271118236701683806, guid: d5094eff82dad9644992504adbafcff2, type: 2}
   m_fontSharedMaterials: []
   m_fontMaterial: {fileID: 0}
   m_fontMaterials: []
@@ -234,8 +234,8 @@ MonoBehaviour:
     m_SelectOnRight: {fileID: 0}
   m_Transition: 1
   m_Colors:
-    m_NormalColor: {r: 0.31132078, g: 0.31132078, b: 0.31132078, a: 1}
-    m_HighlightedColor: {r: 0.4716981, g: 0.4716981, b: 0.4716981, a: 1}
+    m_NormalColor: {r: 0.6039216, g: 0.6039216, b: 0.6039216, a: 1}
+    m_HighlightedColor: {r: 0.3773585, g: 0.3773585, b: 0.3773585, a: 1}
     m_PressedColor: {r: 0.6320754, g: 0.6320754, b: 0.6320754, a: 1}
     m_SelectedColor: {r: 0.3679245, g: 0.3679245, b: 0.3679245, a: 1}
     m_DisabledColor: {r: 0.78431374, g: 0.78431374, b: 0.78431374, a: 0.5019608}
@@ -304,7 +304,7 @@ MonoBehaviour:
   m_CaretWidth: 1
   m_ReadOnly: 0
   m_RichText: 1
-  m_GlobalFontAsset: {fileID: 11400000, guid: af2e7de8d4799f942bb2a9c3696aa82e, type: 2}
+  m_GlobalFontAsset: {fileID: 11400000, guid: d5094eff82dad9644992504adbafcff2, type: 2}
   m_OnFocusSelectAll: 1
   m_ResetOnDeActivation: 1
   m_RestoreOriginalTextOnEscape: 1
@@ -348,7 +348,7 @@ RectTransform:
   m_AnchorMin: {x: 1, y: 0.5}
   m_AnchorMax: {x: 1, y: 0.5}
   m_AnchoredPosition: {x: -45, y: 0}
-  m_SizeDelta: {x: 90, y: 90}
+  m_SizeDelta: {x: 120, y: 90}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!222 &5551517689745804722
 CanvasRenderer:
@@ -371,7 +371,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   m_Material: {fileID: 0}
-  m_Color: {r: 0.3764706, g: 0.3764706, b: 0.3764706, a: 1}
+  m_Color: {r: 0.6320754, g: 0.6320754, b: 0.6320754, a: 1}
   m_RaycastTarget: 1
   m_RaycastPadding: {x: 0, y: 0, z: 0, w: 0}
   m_Maskable: 1
@@ -409,7 +409,7 @@ MonoBehaviour:
     m_SelectOnRight: {fileID: 0}
   m_Transition: 1
   m_Colors:
-    m_NormalColor: {r: 0.5188679, g: 0.5188679, b: 0.5188679, a: 1}
+    m_NormalColor: {r: 0.8490566, g: 0.8490566, b: 0.8490566, a: 1}
     m_HighlightedColor: {r: 0.5849056, g: 0.5849056, b: 0.5849056, a: 1}
     m_PressedColor: {r: 0.6509434, g: 0.6509434, b: 0.6509434, a: 1}
     m_SelectedColor: {r: 0.5471698, g: 0.5471698, b: 0.5471698, a: 1}
@@ -499,8 +499,8 @@ MonoBehaviour:
       m_Calls: []
   m_text: "\xD6ffentliche Spiele"
   m_isRightToLeft: 0
-  m_fontAsset: {fileID: 11400000, guid: 0721de14e6d42aa4bba74e1af96ae09e, type: 2}
-  m_sharedMaterial: {fileID: 3731291824425652605, guid: 0721de14e6d42aa4bba74e1af96ae09e, type: 2}
+  m_fontAsset: {fileID: 11400000, guid: e07f49a0282d0ef4382388aa5b44ea0b, type: 2}
+  m_sharedMaterial: {fileID: 4292659085019268148, guid: e07f49a0282d0ef4382388aa5b44ea0b, type: 2}
   m_fontSharedMaterials: []
   m_fontMaterial: {fileID: 0}
   m_fontMaterials: []
@@ -756,8 +756,8 @@ MonoBehaviour:
       m_Calls: []
   m_text: Keine Spiele gefunden...
   m_isRightToLeft: 0
-  m_fontAsset: {fileID: 11400000, guid: af2e7de8d4799f942bb2a9c3696aa82e, type: 2}
-  m_sharedMaterial: {fileID: -875524696333987651, guid: af2e7de8d4799f942bb2a9c3696aa82e, type: 2}
+  m_fontAsset: {fileID: 11400000, guid: d5094eff82dad9644992504adbafcff2, type: 2}
+  m_sharedMaterial: {fileID: -4271118236701683806, guid: d5094eff82dad9644992504adbafcff2, type: 2}
   m_fontSharedMaterials: []
   m_fontMaterial: {fileID: 0}
   m_fontMaterials: []
@@ -911,8 +911,8 @@ MonoBehaviour:
       m_Calls: []
   m_text: Lobby Code eingeben...
   m_isRightToLeft: 0
-  m_fontAsset: {fileID: 11400000, guid: af2e7de8d4799f942bb2a9c3696aa82e, type: 2}
-  m_sharedMaterial: {fileID: -875524696333987651, guid: af2e7de8d4799f942bb2a9c3696aa82e, type: 2}
+  m_fontAsset: {fileID: 11400000, guid: d5094eff82dad9644992504adbafcff2, type: 2}
+  m_sharedMaterial: {fileID: -4271118236701683806, guid: d5094eff82dad9644992504adbafcff2, type: 2}
   m_fontSharedMaterials: []
   m_fontMaterial: {fileID: 0}
   m_fontMaterials: []
@@ -1015,7 +1015,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 0
+  m_IsActive: 1
 --- !u!224 &4121347371647289053
 RectTransform:
   m_ObjectHideFlags: 0
@@ -1377,8 +1377,8 @@ MonoBehaviour:
       m_Calls: []
   m_text: 'Mit einem Lobby Code beitreten:'
   m_isRightToLeft: 0
-  m_fontAsset: {fileID: 11400000, guid: af2e7de8d4799f942bb2a9c3696aa82e, type: 2}
-  m_sharedMaterial: {fileID: -875524696333987651, guid: af2e7de8d4799f942bb2a9c3696aa82e, type: 2}
+  m_fontAsset: {fileID: 11400000, guid: c06760088ee92424993bf8dfda6d59ce, type: 2}
+  m_sharedMaterial: {fileID: -374211385897340031, guid: c06760088ee92424993bf8dfda6d59ce, type: 2}
   m_fontSharedMaterials: []
   m_fontMaterial: {fileID: 0}
   m_fontMaterials: []
@@ -1402,7 +1402,7 @@ MonoBehaviour:
   m_faceColor:
     serializedVersion: 2
     rgba: 4294967295
-  m_fontSize: 29.55
+  m_fontSize: 38.85
   m_fontSizeBase: 36
   m_fontWeight: 400
   m_enableAutoSizing: 1
@@ -1502,7 +1502,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   m_Material: {fileID: 0}
-  m_Color: {r: 0.4627451, g: 0.4627451, b: 0.4627451, a: 1}
+  m_Color: {r: 0.754717, g: 0.754717, b: 0.754717, a: 1}
   m_RaycastTarget: 1
   m_RaycastPadding: {x: 0, y: 0, z: 0, w: 0}
   m_Maskable: 1
@@ -1559,10 +1559,6 @@ PrefabInstance:
       value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 656710633924247119, guid: 0d2cee802788e864f8244d5b5407035d, type: 3}
-      propertyPath: m_AnchoredPosition.y
-      value: -50
-      objectReference: {fileID: 0}
-    - target: {fileID: 656710633924247119, guid: 0d2cee802788e864f8244d5b5407035d, type: 3}
       propertyPath: m_LocalEulerAnglesHint.x
       value: 0
       objectReference: {fileID: 0}
@@ -1583,9 +1579,17 @@ PrefabInstance:
       value: Spiel beitreten
       objectReference: {fileID: 0}
     - target: {fileID: 6650022268214025367, guid: 0d2cee802788e864f8244d5b5407035d, type: 3}
+      propertyPath: m_fontAsset
+      value: 
+      objectReference: {fileID: 11400000, guid: e07f49a0282d0ef4382388aa5b44ea0b, type: 2}
+    - target: {fileID: 6650022268214025367, guid: 0d2cee802788e864f8244d5b5407035d, type: 3}
       propertyPath: m_fontSizeBase
       value: 60
       objectReference: {fileID: 0}
+    - target: {fileID: 6650022268214025367, guid: 0d2cee802788e864f8244d5b5407035d, type: 3}
+      propertyPath: m_sharedMaterial
+      value: 
+      objectReference: {fileID: 4292659085019268148, guid: e07f49a0282d0ef4382388aa5b44ea0b, type: 2}
     - target: {fileID: 6650022268214025367, guid: 0d2cee802788e864f8244d5b5407035d, type: 3}
       propertyPath: m_fontColor32.rgba
       value: 4294967295
@@ -1597,6 +1601,18 @@ PrefabInstance:
     - target: {fileID: 6650022268214025367, guid: 0d2cee802788e864f8244d5b5407035d, type: 3}
       propertyPath: m_HorizontalAlignment
       value: 2
+      objectReference: {fileID: 0}
+    - target: {fileID: 6650022268214025367, guid: 0d2cee802788e864f8244d5b5407035d, type: 3}
+      propertyPath: m_fontColorGradient.bottomRight.b
+      value: 0.254717
+      objectReference: {fileID: 0}
+    - target: {fileID: 6650022268214025367, guid: 0d2cee802788e864f8244d5b5407035d, type: 3}
+      propertyPath: m_fontColorGradient.bottomRight.g
+      value: 0.254717
+      objectReference: {fileID: 0}
+    - target: {fileID: 6650022268214025367, guid: 0d2cee802788e864f8244d5b5407035d, type: 3}
+      propertyPath: m_fontColorGradient.bottomRight.r
+      value: 0.254717
       objectReference: {fileID: 0}
     m_RemovedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: 0d2cee802788e864f8244d5b5407035d, type: 3}
