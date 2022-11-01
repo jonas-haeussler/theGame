@@ -3,10 +3,13 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using Unity.Services.Relay;
 using Unity.Services.Core;
 using Unity.Services.Lobbies;
 using Unity.Services.Lobbies.Models;
 using Unity.Services.Authentication;
+using Unity.Netcode;
+using Unity.Netcode.Transports.UTP;
 using UnityEngine;
 using Unity.Services.Relay.Models;
 using TMPro;
@@ -17,6 +20,8 @@ namespace Menu
     {
 
         [SerializeField] protected TextMeshProUGUI heading;
+
+        private JoinAllocation joinAllocation;
 
         protected abstract void onInitFinished();
         async protected virtual void Start()
@@ -82,6 +87,36 @@ namespace Menu
                 // Notify the player with the proper error message
                 Debug.LogException(ex);
             }
+        }
+
+        protected async Task<JoinAllocation> joinRelay(Lobby lobby)
+        {
+            try
+            {
+                DataObject relayJoinCode;
+                lobby.Data.TryGetValue("JoinCode", out relayJoinCode);
+                Debug.Log($"JoinCode received from Lobby: {relayJoinCode.Value}");
+                joinAllocation = await RelayService.Instance.JoinAllocationAsync(relayJoinCode.Value);
+                Debug.Log($"Allocation joined: {joinAllocation.AllocationId}");
+                return joinAllocation;
+            }
+            catch (RelayServiceException e)
+            {
+                Debug.Log(e);
+            }
+            return null;
+        }
+        protected void startClient(JoinAllocation joinAllocation)
+        {
+
+            NetworkManager.Singleton.GetComponent<UnityTransport>().SetRelayServerData(joinAllocation.RelayServer.IpV4,
+                                                                                     (ushort)joinAllocation.RelayServer.Port,
+                                                                                     joinAllocation.AllocationIdBytes,
+                                                                                     joinAllocation.Key,
+                                                                                     joinAllocation.ConnectionData,
+                                                                                     joinAllocation.HostConnectionData);
+            NetworkManager.Singleton.StartClient();
+            Debug.Log("Client started");
         }
     }
 }

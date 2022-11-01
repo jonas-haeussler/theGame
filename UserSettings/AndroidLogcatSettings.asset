@@ -3,63 +3,57 @@
     "m_SelectedPackage": {
         "deviceId": "574dce5e9804",
         "name": "com.DefaultCompany.TheGame",
-        "processId": 25022,
+        "processId": 8943,
         "exited": false
     },
     "m_SelectedPriority": 0,
     "m_KnownPackagesForSerialization": [
         {
             "deviceId": "574dce5e9804",
-            "name": "com.google.android.apps.nexuslauncher",
-            "processId": 2862,
+            "name": "com.DefaultCompany.TheGame",
+            "processId": 13741,
+            "exited": true
+        },
+        {
+            "deviceId": "574dce5e9804",
+            "name": "com.DefaultCompany.TheGame",
+            "processId": 12545,
+            "exited": true
+        },
+        {
+            "deviceId": "574dce5e9804",
+            "name": "com.DefaultCompany.TheGame",
+            "processId": 20044,
+            "exited": true
+        },
+        {
+            "deviceId": "574dce5e9804",
+            "name": "com.DefaultCompany.TheGame",
+            "processId": 20718,
+            "exited": true
+        },
+        {
+            "deviceId": "574dce5e9804",
+            "name": "com.DefaultCompany.TheGame",
+            "processId": 21463,
+            "exited": true
+        },
+        {
+            "deviceId": "574dce5e9804",
+            "name": "notizen.basic.notes.notas.note.notepad",
+            "processId": 20330,
             "exited": false
         },
         {
             "deviceId": "574dce5e9804",
             "name": "com.DefaultCompany.TheGame",
-            "processId": 20939,
-            "exited": true
-        },
-        {
-            "deviceId": "574dce5e9804",
-            "name": "com.DefaultCompany.TheGame",
-            "processId": 21239,
-            "exited": true
-        },
-        {
-            "deviceId": "574dce5e9804",
-            "name": "com.DefaultCompany.TheGame",
-            "processId": 22022,
-            "exited": true
-        },
-        {
-            "deviceId": "574dce5e9804",
-            "name": "com.DefaultCompany.TheGame",
-            "processId": 22180,
-            "exited": true
-        },
-        {
-            "deviceId": "574dce5e9804",
-            "name": "com.DefaultCompany.TheGame",
-            "processId": 22329,
-            "exited": true
-        },
-        {
-            "deviceId": "574dce5e9804",
-            "name": "com.DefaultCompany.TheGame",
-            "processId": 22671,
+            "processId": 21774,
             "exited": false
         },
         {
             "deviceId": "574dce5e9804",
             "name": "com.DefaultCompany.TheGame",
-            "processId": 24671,
-            "exited": false
-        },
-        {
-            "deviceId": "574dce5e9804",
-            "name": "com.DefaultCompany.TheGame",
-            "processId": 25022,
+            "processId": 8943,
             "exited": false
         }
     ],

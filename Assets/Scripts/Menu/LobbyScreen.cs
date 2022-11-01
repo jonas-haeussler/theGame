@@ -14,6 +14,8 @@ using System.Threading.Tasks;
 using Unity.Netcode.Transports.UTP;
 using Unity.Services.Relay;
 using Unity.Services.Relay.Models;
+using Networking;
+using Gameplay;
 
 namespace Menu
 {
@@ -99,6 +101,21 @@ namespace Menu
             });
             gamestartButton.onClick.AddListener(() =>
             {
+                NetworkManager.Singleton.GetComponent<NetworkConnection>().AddSceneLoadFinishedCallback((sceneName, loadSceneMode, clientsCompleted, clientsTimedOut) =>
+                {
+                    if (NetworkManager.Singleton.IsHost)
+                    {
+                        if (sceneName.Equals("GameScene"))
+                        {
+                            Debug.Log($"Initializing Game for {clientsCompleted.Count} clients");
+                            Debug.Log("Hier scene");
+                            Game.onSceneLoadFinished();
+                        }
+                        // Debug.Log("Hier test");
+                        // onSceneLoadFinishedServerRpc();
+                    }
+                });
+                
                 NetworkManager.Singleton.SceneManager.LoadScene("GameScene", LoadSceneMode.Single);
 
             });

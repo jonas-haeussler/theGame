@@ -4,6 +4,7 @@ using UnityEngine;
 using TMPro;
 using UnityEngine.UI;
 using UnityEngine.SceneManagement;
+using Core;
 
 namespace UI
 {
@@ -57,7 +58,7 @@ namespace UI
             });
             quitButton.onClick.AddListener(() =>
             {
-
+                PopUpDialogue.Instance.OpenDialogue("Willst du das Spiel wirklich verlassen?", "Ja", "Nein", () => Application.Quit());
             });
         }
         // Start is called before the first frame update

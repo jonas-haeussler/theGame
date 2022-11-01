@@ -35,8 +35,6 @@ namespace Menu
 
         private List<GameObject> lobbiesUI;
 
-        private JoinAllocation allocation;
-
         private void Awake()
         {
             lobbiesUI = new List<GameObject>();
@@ -47,8 +45,8 @@ namespace Menu
                     AuthenticationService.Instance.SignOut();
                     await SignInAnonymouslyAsync();
                     var lobby = await LobbyService.Instance.JoinLobbyByCodeAsync(codeInput.text);
-                    await joinRelay(lobby);
-                    startClient();
+                    JoinAllocation joinAllocation = await joinRelay(lobby);
+                    startClient(joinAllocation);
                     onLobbyJoined(lobby);
                     codeInput.text = "";
                 }
@@ -59,7 +57,7 @@ namespace Menu
             });
 
         }
-        protected async override void onInitFinished()
+        protected override void onInitFinished()
         {
             heading.text = "Spiel beitreten";
             updateLobbyList();
@@ -81,28 +79,7 @@ namespace Menu
                 updateLobbyList();
 
             });
-            if(ProcessDeepLinkMngr.Instance.joinCode != null && !ProcessDeepLinkMngr.Instance.joinCode.Equals(""))
-            {
-                string joinCode = ProcessDeepLinkMngr.Instance.joinCode;
-                foreach(Transform child in transform)
-                {
-                    transform.gameObject.SetActive(false);
-                }
-                ProcessDeepLinkMngr.Instance.joinCode = "";
-                try
-                {
-                    AuthenticationService.Instance.SignOut();
-                    await SignInAnonymouslyAsync();
-                    var lobby = await LobbyService.Instance.JoinLobbyByCodeAsync(joinCode);
-                    await joinRelay(lobby);
-                    startClient();
-                    onLobbyJoined(lobby);
-                } 
-                catch(LobbyServiceException e)
-                {
-                    if (e.ErrorCode == 16000 || e.ErrorCode == 16001) ProcessDeepLinkMngr.Instance.onWrongLink.Invoke();
-                }
-            }
+            
         }
 
         // Update is called once per frame
@@ -137,8 +114,8 @@ namespace Menu
                             if (player.Id.Equals(AuthenticationService.Instance.PlayerId)) return;
                         }
                         await LobbyService.Instance.JoinLobbyByIdAsync(lobby.Id);
-                        await joinRelay(lobby);
-                        startClient();
+                        JoinAllocation joinAllocation = await joinRelay(lobby);
+                        startClient(joinAllocation);
                         onLobbyJoined(lobby);
                         
                     }
@@ -161,32 +138,6 @@ namespace Menu
 
         }
 
-        private async Task joinRelay(Lobby lobby)
-        {
-            try
-            {
-                DataObject relayJoinCode;
-                lobby.Data.TryGetValue("JoinCode", out relayJoinCode);
-                Debug.Log($"JoinCode received from Lobby: {relayJoinCode.Value}");
-                allocation = await RelayService.Instance.JoinAllocationAsync(relayJoinCode.Value);
-                Debug.Log($"Allocation joined: {allocation.AllocationId}");
-            } catch(RelayServiceException e)
-            {
-                Debug.Log(e);
-            }
-        }
-        private void startClient()
-        {
-
-            NetworkManager.Singleton.GetComponent<UnityTransport>().SetRelayServerData(allocation.RelayServer.IpV4,
-                                                                                     (ushort) allocation.RelayServer.Port,
-                                                                                     allocation.AllocationIdBytes,
-                                                                                     allocation.Key,
-                                                                                     allocation.ConnectionData,
-                                                                                     allocation.HostConnectionData);
-            NetworkManager.Singleton.StartClient();
-            Debug.Log("Client started");
-        }
 
         private async Task<List<Lobby>> QueryForLobbies()
         {

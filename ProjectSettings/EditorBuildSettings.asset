@@ -14,4 +14,7 @@ EditorBuildSettings:
   - enabled: 1
     path: Assets/Scenes/LocalGameScene.unity
     guid: a9a07ce2a9da2ee4489b9abb8905ca74
+  - enabled: 1
+    path: Assets/Scenes/LoadGameFromLink.unity
+    guid: e072c0dd88e639c43b02773c5bd9d6e6
   m_configObjects: {}

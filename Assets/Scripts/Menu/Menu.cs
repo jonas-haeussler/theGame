@@ -9,6 +9,7 @@ using Unity.Services.Authentication;
 using UnityEngine.SceneManagement;
 using Unity.Netcode.Transports.UTP;
 using Networking;
+using Core;
 
 namespace Menu 
 {
@@ -26,7 +27,6 @@ namespace Menu
         [SerializeField] private LobbyScreen lobbyScreen;
         [SerializeField] private JoinLobbyScreen joinLobbyScreenPrefab;
 
-        [SerializeField] private PopUpDialogue popUpDialogue;
         private JoinLobbyScreen joinLobbyScreenInst;
 
         private GameObject currentScreen;
@@ -70,14 +70,14 @@ namespace Menu
                             break;
                         case LobbyScreen.LobbyState.waitingForClient:
                         case LobbyScreen.LobbyState.ready:
-                            popUpDialogue.OpenDialogue("Willst du die Lobby wirklich schließen?", "Ja", "Nein", () =>
+                            PopUpDialogue.Instance.OpenDialogue("Willst du die Lobby wirklich schließen?", "Ja", "Nein", () =>
                             {
                                 NetworkManager.Singleton.Shutdown();
                                 lobbyScreen.leaveLobby();
                             }); 
                             break;
                         case LobbyScreen.LobbyState.waitingForHost:
-                            popUpDialogue.OpenDialogue("Willst du die Lobby wirklich verlassen?", "Ja", "Nein", () =>
+                            PopUpDialogue.Instance.OpenDialogue("Willst du die Lobby wirklich verlassen?", "Ja", "Nein", () =>
                             {
                                 NetworkManager.Singleton.Shutdown();
                                 lobbyScreen.leaveLobby();
@@ -97,11 +97,18 @@ namespace Menu
                 }
             });
 
+            quitButton.onClick.AddListener(() =>
+            {
+                PopUpDialogue.Instance.OpenDialogue("Willst du das Spiel wirklich verlassen?", "Ja", "Nein", () => Application.Quit());
+            });
+
         }
 
         // Start is called before the first frame update
         private void Start()
         {
+            NetworkManager.Singleton.GetComponent<NetworkConnection>().ClearConnectCallbacks();
+            NetworkManager.Singleton.GetComponent<NetworkConnection>().ClearDisconnectCallbacks();
             NetworkManager.Singleton.GetComponent<NetworkConnection>().AddConnectCallback((clientId) =>
             {
                 Debug.Log($"Client connected: {clientId}");
@@ -116,14 +123,14 @@ namespace Menu
                 
                 if (NetworkManager.Singleton.IsHost)
                 {
-                    popUpDialogue.OpenDialogue("Dein Mitspieler hat die Lobby verlassen.", "OK", () =>
+                    PopUpDialogue.Instance.OpenDialogue("Dein Mitspieler hat die Lobby verlassen.", "OK", () =>
                     {
                         lobbyScreen.lobbyState = LobbyScreen.LobbyState.waitingForClient;
                     });
                 }
                 else
                 {
-                    popUpDialogue.OpenDialogue("Der Host hat die Lobby verlassen.", "OK", () =>
+                    PopUpDialogue.Instance.OpenDialogue("Der Host hat die Lobby verlassen.", "OK", () =>
                     {
                         lobbyScreen.lobbyState = LobbyScreen.LobbyState.create;
                         currentScreen = createNewJoinLobbyInstance().gameObject;
@@ -131,32 +138,12 @@ namespace Menu
                     });
                 }
             });
-            if(ProcessDeepLinkMngr.Instance.joinCode != null && !ProcessDeepLinkMngr.Instance.joinCode.Equals(""))
-            {
-                ProcessDeepLinkMngr.Instance.onWrongLink = () =>
-                {
-                    Debug.Log("Hier");
-                    popUpDialogue.OpenDialogue("Eine Lobby mit diesem Code wurde nicht gefunden!", "OK", () =>
-                    {
-                        AuthenticationService.Instance.SignOut();
-                        currentScreen = mainMenu.gameObject;
-                        onScreenUpdate();
-                        backButton.gameObject.SetActive(false);
-                    });
-                };
-                currentScreen = createNewJoinLobbyInstance().gameObject;
-                onScreenUpdate();
-                backButton.gameObject.SetActive(true);
-            }
+            
         }
 
         // Update is called once per frame
         void Update()
         {
-            if(ProcessDeepLinkMngr.Instance.joinCode != null && !ProcessDeepLinkMngr.Instance.joinCode.Equals(""))
-            {
-                SceneManager.LoadScene("MenuScene");
-            }
         }
 
         private void onScreenUpdate()
@@ -186,7 +173,7 @@ namespace Menu
             };
             joinLobbyScreenInst.onWrongCodeInserted = () =>
             {
-                popUpDialogue.OpenDialogue("Eine Lobby mit diesem Code wurde nicht gefunden!", "OK");
+                PopUpDialogue.Instance.OpenDialogue("Eine Lobby mit diesem Code wurde nicht gefunden!", "OK");
             };
             joinLobbyScreenInst.transform.SetAsFirstSibling();
             return joinLobbyScreenInst;

@@ -11,27 +11,33 @@ using TMPro;
 using UnityEngine.SceneManagement;
 using Players;
 using Types;
-using Menu;
 using UI;
 using Networking;
+using Core;
 
 namespace Gameplay {
     public class Game : NetworkBehaviour
     {
 
-        private EndingProperties endingProperties;
+        public static Game Instance;
 
-        private Player LocalPlayer;
-        private Player RemotePlayer;
+        private static EndingProperties endingProperties;
+
+        private static Player LocalPlayer;
+        private static Player RemotePlayer;
         [SerializeField] private GameObject cardPrefab;
         [SerializeField] private EndScreen endScreen;
         [SerializeField] private MenuScreen menuScreen;
         [SerializeField] private Button menuButton;
-        [SerializeField] private PopUpDialogue popUpDialogue;
         [SerializeField] private Fader fader;
         [SerializeField] private bool local;
-        private Turn currentTurn;
-        private List<Turn> allTurns;
+        private static Turn currentTurn;
+        private static List<Turn> allTurns;
+
+        private void Awake()
+        {
+            Instance = this;
+        }
 
         private void Start()
         {
@@ -46,7 +52,7 @@ namespace Gameplay {
             });
             menuScreen.menuAction = () =>
             {
-                popUpDialogue.OpenDialogue("Möchtest du wirklich das Spiel verlassen?", "Ja", "Nein", () =>
+                PopUpDialogue.Instance.OpenDialogue("Möchtest du wirklich das Spiel verlassen?", "Ja", "Nein", () =>
                 {
                     NetworkManager.Singleton.Shutdown();
                     SceneManager.LoadScene("MenuScene");
@@ -55,7 +61,7 @@ namespace Gameplay {
             NetworkManager.Singleton.GetComponent<NetworkConnection>().ClearDisconnectCallbacks();
             NetworkManager.Singleton.GetComponent<NetworkConnection>().AddDisconnectCallback((clientId) =>
             {
-                popUpDialogue.OpenDialogue("Dein Gegner hat das Spiel verlassen. Möchtest du zum Menu zurückkehren?", "Ja", "Nein", () =>
+                PopUpDialogue.Instance.OpenDialogue("Dein Gegner hat das Spiel verlassen. Möchtest du zum Menu zurückkehren?", "Ja", "Nein", () =>
                 {
                     NetworkManager.Singleton.Shutdown();
                     SceneManager.LoadScene("MenuScene");
@@ -66,37 +72,27 @@ namespace Gameplay {
             {
                 onSceneLoadFinished();
             }
-            else
-            {
-                if (!NetworkManager.Singleton.IsHost)
-                    onSceneLoadFinishedServerRpc();
-            }
             
 
 
         }
-        [ServerRpc(RequireOwnership = false)]
-        private void onSceneLoadFinishedServerRpc()
-        {
-            Debug.Log($"Initializing Game for {NetworkManager.Singleton.ConnectedClients.Count} clients");
+        
 
-            onSceneLoadFinished();
-        }
-
-        private void onSceneLoadFinished()
+        public static void onSceneLoadFinished()
         {
+            
             var random = new System.Random();
             List<int> hostOrdering = Enumerable.Range(2, 58).OrderBy(a => random.Next()).ToList();
             List<int> clientOrdering = Enumerable.Range(2, 58).OrderBy(a => random.Next()).ToList();
             PlayerID hostPlayerId = random.Next(2) == 0 ? PlayerID.Player1 : PlayerID.Player2;
             PlayerID clientPlayerId = hostPlayerId.Equals(PlayerID.Player2) ? PlayerID.Player1 : PlayerID.Player2;
-            if (local)
+            if (Instance.local)
             {
                 setupGameClient(hostPlayerId, clientPlayerId, hostOrdering.ToArray(), clientOrdering.ToArray());
             }
             else 
             {
-                setupGameClientRpc(hostPlayerId, clientPlayerId, hostOrdering.ToArray(), clientOrdering.ToArray());
+                Instance.setupGameClientRpc(hostPlayerId, clientPlayerId, hostOrdering.ToArray(), clientOrdering.ToArray());
             }
         }
 
@@ -116,10 +112,6 @@ namespace Gameplay {
                 }
             }
 
-            if (ProcessDeepLinkMngr.Instance.joinCode != null && !ProcessDeepLinkMngr.Instance.joinCode.Equals(""))
-            {
-                SceneManager.LoadScene("MenuScene");
-            }
         }
         [ClientRpc]
         private void setupGameClientRpc(PlayerID hostPlayerId, PlayerID clientPlayerId, int[] hostOrdering, int[] clientOrdering)
@@ -128,14 +120,14 @@ namespace Gameplay {
             setupGameClient(hostPlayerId, clientPlayerId, hostOrdering, clientOrdering);
         }
 
-        private void setupGameClient(PlayerID hostPlayerId, PlayerID clientPlayerId, int[] hostOrdering, int[] clientOrdering)
+        private static void setupGameClient(PlayerID hostPlayerId, PlayerID clientPlayerId, int[] hostOrdering, int[] clientOrdering)
         {
        
             PlayerID myPlayerId;
             PlayerID otherPlayerId;
             List<int> myOrdering;
             List<int> otherOrdering;
-            if (local || NetworkManager.Singleton.IsHost)
+            if (Instance.local || NetworkManager.Singleton.IsHost)
             {
                 myPlayerId = hostPlayerId;
                 otherPlayerId = clientPlayerId;
@@ -152,19 +144,19 @@ namespace Gameplay {
             gameState = GameState.Init;
             LocalPlayer = FindObjectOfType<LocalPlayer>();
             RemotePlayer = FindObjectOfType<RemotePlayer>();
-            fader.StartFading();
-            LocalPlayer.initGame(myPlayerId, cardPrefab, onCardPlayedLocal, onTurnFinishedLocal, myOrdering);
-            RemotePlayer.initGame(otherPlayerId, cardPrefab, onCardPlayedLocal, onTurnFinishedLocal, otherOrdering);
+            Instance.fader.StartFading();
+            LocalPlayer.initGame(myPlayerId, Instance.cardPrefab, onCardPlayedLocal, onTurnFinishedLocal, myOrdering);
+            RemotePlayer.initGame(otherPlayerId, Instance.cardPrefab, onCardPlayedLocal, onTurnFinishedLocal, otherOrdering);
             currentTurn = new Turn(PlayerID.Player1);
             gameState = GameState.Rounds;
             allTurns = new List<Turn>();
         }
-        private GameState gameState;
+        private static GameState gameState;
 
         
 
 
-        private void updateHand(DiscardActionParameters parameters)
+        private static void updateHand(DiscardActionParameters parameters)
         {
             var currentPlayer = currentTurn.PlayerID.Equals(LocalPlayer.PlayerID) ? LocalPlayer : RemotePlayer;
             var player1 = LocalPlayer.PlayerID.Equals(PlayerID.Player1) ? LocalPlayer : RemotePlayer;
@@ -197,9 +189,9 @@ namespace Gameplay {
             }
         }
 
-        private void onCardPlayedLocal(DiscardActionParameters parameters)
+        private static void onCardPlayedLocal(DiscardActionParameters parameters)
         {
-            if (local)
+            if (Instance.local)
             {
                 onCardPlayed(parameters);
                 if (gameFinished())
@@ -212,21 +204,21 @@ namespace Gameplay {
                 if (NetworkManager.Singleton.IsHost)
                 {
                     Debug.Log("Sending Clients request to play card");
-                    onCardPlayedClientRpc(parameters.PlayerID, parameters.PileType, parameters.CardNumber);
+                    Instance.onCardPlayedClientRpc(parameters.PlayerID, parameters.PileType, parameters.CardNumber);
                     if (gameFinished())
                     {
-                        onGameFinishedClientRpc(endingProperties.winner, endingProperties.noTurnsLeftCondition);
+                        Instance.onGameFinishedClientRpc(endingProperties.winner, endingProperties.noTurnsLeftCondition);
                     }
                 }
                 else if (NetworkManager.Singleton.IsClient)
                 {
                     Debug.Log("Sending Host request to accept card play");
-                    onCardPlayedServerRpc(parameters.PlayerID, parameters.PileType, parameters.CardNumber);
+                    Instance.onCardPlayedServerRpc(parameters.PlayerID, parameters.PileType, parameters.CardNumber);
                 }
             }
         }
 
-        private void onCardPlayed(DiscardActionParameters parameters)
+        private static void onCardPlayed(DiscardActionParameters parameters)
         {
             updateHand(parameters);
             currentTurn.DiscardActionParameters.Add(parameters);
@@ -241,13 +233,13 @@ namespace Gameplay {
 
         }
 
-        private void onGameFinished(PlayerID winner, bool noTurnsLeftCondition)
+        private static void onGameFinished(PlayerID winner, bool noTurnsLeftCondition)
         {
             gameState = GameState.Finished;
-            endScreen.victory = winner.Equals(LocalPlayer.PlayerID);
-            endScreen.noTurnsLeftCondition = noTurnsLeftCondition;
-            endScreen.onReplayCallback = onReplayRequest;
-            endScreen.gameObject.SetActive(true);
+            Instance.endScreen.victory = winner.Equals(LocalPlayer.PlayerID);
+            Instance.endScreen.noTurnsLeftCondition = noTurnsLeftCondition;
+            Instance.endScreen.onReplayCallback = onReplayRequest;
+            Instance.endScreen.gameObject.SetActive(true);
             LocalPlayer.active = false;
         }
 
@@ -282,14 +274,14 @@ namespace Gameplay {
         }
 
 
-        private void onTurnFinishedLocal()
+        private static void onTurnFinishedLocal()
         {
-            if (local)
+            if (Instance.local)
             {
                 onTurnFinished();
                 if (gameFinished())
                 {
-                    onGameFinishedClientRpc(endingProperties.winner, endingProperties.noTurnsLeftCondition);
+                    Instance.onGameFinishedClientRpc(endingProperties.winner, endingProperties.noTurnsLeftCondition);
                 }
             }
             else
@@ -297,28 +289,28 @@ namespace Gameplay {
                 if (NetworkManager.Singleton.IsHost)
                 {
                     Debug.Log("Sending Turn Finish Request to Clients");
-                    onTurnFinishedClientRpc();
+                    Instance.onTurnFinishedClientRpc();
                     if (gameFinished())
                     {
-                        onGameFinishedClientRpc(endingProperties.winner, endingProperties.noTurnsLeftCondition);
+                        Instance.onGameFinishedClientRpc(endingProperties.winner, endingProperties.noTurnsLeftCondition);
                     }
                 }
                 else if (NetworkManager.Singleton.IsClient)
                 {
                     Debug.Log("Sending Turn finish request to Server");
-                    onTurnFinishedServerRpc();
+                    Instance.onTurnFinishedServerRpc();
                 }
             }
         }
 
-        private void onTurnFinished()
+        private static void onTurnFinished()
         {
             currentTurn = new Turn(currentTurn.PlayerID.Equals(PlayerID.Player1) ? PlayerID.Player2 : PlayerID.Player1);
             allTurns.Add(currentTurn);
             LocalPlayer.TurnChanged(currentTurn);
             RemotePlayer.TurnChanged(currentTurn);
         }
-        private bool gameFinished()
+        private static bool gameFinished()
         {
             var currentPlayer = currentTurn.PlayerID.Equals(LocalPlayer.PlayerID) ? LocalPlayer : RemotePlayer;
             if(!currentPlayer.HasTurnLeft())
@@ -335,9 +327,9 @@ namespace Gameplay {
             return false;
         }
 
-        private void onReplayRequest()
+        private static void onReplayRequest()
         {
-            if (local) 
+            if (Instance.local) 
             {
                 SceneManager.LoadScene("LocalGameScene");
             }
@@ -345,11 +337,11 @@ namespace Gameplay {
             {
                 if (NetworkManager.Singleton.IsHost)
                 {
-                    onReplayRequestClientRpc(LocalPlayer.PlayerID);
+                    Instance.onReplayRequestClientRpc(LocalPlayer.PlayerID);
                 }
                 else if (NetworkManager.Singleton.IsClient)
                 {
-                    onReplayRequestServerRpc(LocalPlayer.PlayerID);
+                    Instance.onReplayRequestServerRpc(LocalPlayer.PlayerID);
                 }
             }
             
@@ -361,7 +353,7 @@ namespace Gameplay {
             if (LocalPlayer.PlayerID.Equals(playerID)) return;
             else
             {
-                popUpDialogue.OpenDialogue("Dein Gegner möchte nochmal spielen. Du auch?", "Ja", "Nein", onReplayConfirm);
+                PopUpDialogue.Instance.OpenDialogue("Dein Gegner möchte nochmal spielen. Du auch?", "Ja", "Nein", onReplayConfirm);
             }
         }
 

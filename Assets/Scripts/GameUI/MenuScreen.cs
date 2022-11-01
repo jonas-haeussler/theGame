@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System;
 using UnityEngine;
 using UnityEngine.UI;
+using Core;
 
 namespace UI
 {
@@ -28,7 +29,7 @@ namespace UI
             });
             quitButton.onClick.AddListener(() =>
             {
-
+                PopUpDialogue.Instance.OpenDialogue("Willst du das Spiel wirklich verlassen?", "Ja", "Nein", () => Application.Quit());
             });
         }
 

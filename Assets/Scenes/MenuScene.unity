@@ -804,7 +804,6 @@ MonoBehaviour:
   mainMenu: {fileID: 1103942815}
   lobbyScreen: {fileID: 1755272294}
   joinLobbyScreenPrefab: {fileID: 4046176006868559180, guid: da1b7126c42406b4193a43c820f20301, type: 3}
-  popUpDialogue: {fileID: 1462734107}
 --- !u!114 &1360511160
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -935,17 +934,6 @@ RectTransform:
   m_CorrespondingSourceObject: {fileID: 999082927010796875, guid: 26a61b2018ed16b43b5bd3fc598fd339, type: 3}
   m_PrefabInstance: {fileID: 999082925616879699}
   m_PrefabAsset: {fileID: 0}
---- !u!114 &1462734107 stripped
-MonoBehaviour:
-  m_CorrespondingSourceObject: {fileID: 999082927010796872, guid: 26a61b2018ed16b43b5bd3fc598fd339, type: 3}
-  m_PrefabInstance: {fileID: 999082925616879699}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 0}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 3b682c49c93177348a26886b1025135b, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
 --- !u!114 &1755272294 stripped
 MonoBehaviour:
   m_CorrespondingSourceObject: {fileID: 201297574597057123, guid: dcb64d1eda2c26344ae5c1fa4940d620, type: 3}
@@ -1424,13 +1412,45 @@ PrefabInstance:
       propertyPath: m_Color.a
       value: 0.9019608
       objectReference: {fileID: 0}
+    - target: {fileID: 999082925759603164, guid: 26a61b2018ed16b43b5bd3fc598fd339, type: 3}
+      propertyPath: m_AnchorMax.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 999082925759603164, guid: 26a61b2018ed16b43b5bd3fc598fd339, type: 3}
+      propertyPath: m_AnchorMin.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 999082925759603164, guid: 26a61b2018ed16b43b5bd3fc598fd339, type: 3}
+      propertyPath: m_AnchoredPosition.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 999082925759603164, guid: 26a61b2018ed16b43b5bd3fc598fd339, type: 3}
+      propertyPath: m_AnchoredPosition.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 999082926280898439, guid: 26a61b2018ed16b43b5bd3fc598fd339, type: 3}
+      propertyPath: m_AnchorMax.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 999082926280898439, guid: 26a61b2018ed16b43b5bd3fc598fd339, type: 3}
+      propertyPath: m_AnchorMin.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 999082926280898439, guid: 26a61b2018ed16b43b5bd3fc598fd339, type: 3}
+      propertyPath: m_AnchoredPosition.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 999082926280898439, guid: 26a61b2018ed16b43b5bd3fc598fd339, type: 3}
+      propertyPath: m_AnchoredPosition.y
+      value: 0
+      objectReference: {fileID: 0}
     - target: {fileID: 999082927010796868, guid: 26a61b2018ed16b43b5bd3fc598fd339, type: 3}
       propertyPath: m_Name
       value: PopupDialogue
       objectReference: {fileID: 0}
     - target: {fileID: 999082927010796868, guid: 26a61b2018ed16b43b5bd3fc598fd339, type: 3}
       propertyPath: m_IsActive
-      value: 0
+      value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 999082927010796874, guid: 26a61b2018ed16b43b5bd3fc598fd339, type: 3}
       propertyPath: m_Material

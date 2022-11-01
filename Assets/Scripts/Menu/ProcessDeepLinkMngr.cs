@@ -12,7 +12,6 @@ namespace Menu
         private string deeplinkURL;
 
         public string joinCode;
-        public Action onWrongLink;
         private void Awake()
         {
             if (Instance == null)
@@ -34,6 +33,14 @@ namespace Menu
             }
         }
 
+        private void Start()
+        {
+            if(!joinCode.Equals(""))
+            {
+                onDeepLinkActivated($"test?{joinCode}");
+            }
+        }
+
         private void onDeepLinkActivated(string url)
         {
             // Update DeepLink Manager global variable, so URL can be accessed from anywhere.
@@ -43,6 +50,8 @@ namespace Menu
             // In this example, the app expects a link formatted like this:
             // unitydl://mylink?scene1
             joinCode = url.Split("?"[0])[1];
+
+            SceneManager.LoadScene("LoadGameFromLink", LoadSceneMode.Additive);
 
         }
     }
