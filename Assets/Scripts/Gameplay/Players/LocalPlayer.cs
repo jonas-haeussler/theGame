@@ -81,7 +81,7 @@ namespace Players
                         if(dragObject != null)
                         {
                             oldSiblingIndex = dragObject.transform.GetSiblingIndex();
-                            dragObject.transform.SetParent(Hand.GetComponentInParent<Canvas>().transform);
+                            // dragObject.transform.SetParent(Hand.GetComponentInParent<Canvas>().transform);
                         }
 
                     }
@@ -90,7 +90,7 @@ namespace Players
                         dragObject.GetComponent<RectTransform>().position += new Vector3(touch.deltaPosition.x, touch.deltaPosition.y, 0);
                         dragObject.transform.localRotation = Quaternion.Euler(0, 0, 0);
                         dragObject.isDragging = true;
-                        int indexInHand = Hand.GetCardIndexFromPosition(dragObject.transform.position);
+                        int indexInHand = Hand.GetCardIndexFromPosition(dragObject.transform);
                         if (indexInHand != -1 && !Hand.GetHandCards()[indexInHand].Equals(dragObject)) 
                         {
                             dragObject.transform.SetParent(Hand.transform);

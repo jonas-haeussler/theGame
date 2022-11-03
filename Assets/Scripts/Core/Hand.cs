@@ -106,14 +106,16 @@ namespace Core {
             return getCardPosition(handCards.Count, handCards.Count + drawAmount);
         }
 
-        public int GetCardIndexFromPosition(Vector3 position) 
+        public int GetCardIndexFromPosition(Transform cardTransform) 
         {
+            Vector3 position = cardTransform.position;
             handCards = GetComponentsInChildren<Card>().ToList();
             for (int i = 0; i < handCards.Count; i++) 
             {
+                if (handCards[i].transform.Equals(cardTransform)) continue;
                 Vector3 cardPos = transform.position + getCardPosition(i, handCards.Count);
 
-                if (Mathf.Abs(position.x - cardPos.x) < 10 && Mathf.Abs(position.y - cardPos.y) < 50)
+                if (Mathf.Abs(position.x - cardPos.x) < 10 && Mathf.Abs(position.y - cardPos.y) < 200)
                     return i;
             }
             return -1;
