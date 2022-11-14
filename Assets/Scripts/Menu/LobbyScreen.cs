@@ -153,7 +153,7 @@ namespace Menu
                     gamestartButton.gameObject.SetActive(false);
                     spinner.SetActive(true);
                     lobbyCodeText.gameObject.SetActive(true);
-                    if (pollTime > 45)
+                    if (pollTime > 15)
                     {
                         pollTime = 0;
                         await LobbyService.Instance.SendHeartbeatPingAsync(lobby.Id);
