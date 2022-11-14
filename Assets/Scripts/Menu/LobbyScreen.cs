@@ -16,11 +16,13 @@ using Unity.Services.Relay;
 using Unity.Services.Relay.Models;
 using Networking;
 using Gameplay;
+using Core;
 
 namespace Menu
 {
     public class LobbyScreen : OnlineMenuScreen
     {
+
         public enum LobbyState
         {
             create, waitingForClient, waitingForHost, ready
@@ -108,7 +110,6 @@ namespace Menu
                         if (sceneName.Equals("GameScene"))
                         {
                             Debug.Log($"Initializing Game for {clientsCompleted.Count} clients");
-                            Debug.Log("Hier scene");
                             Game.onSceneLoadFinished();
                         }
                         // Debug.Log("Hier test");
@@ -152,11 +153,25 @@ namespace Menu
                     gamestartButton.gameObject.SetActive(false);
                     spinner.SetActive(true);
                     lobbyCodeText.gameObject.SetActive(true);
-                    if (pollTime > 15)
+                    if (pollTime > 45)
                     {
                         pollTime = 0;
                         await LobbyService.Instance.SendHeartbeatPingAsync(lobby.Id);
-                        Debug.Log($"Sending Heartbeat for lobby: {lobby.Id}"); 
+                        Debug.Log($"Sending Heartbeat for lobby: {lobby.Id}");
+                        try
+                        {
+                            lobby = await LobbyService.Instance.GetLobbyAsync("lobbyId");
+                            Debug.Log(lobby);
+                        } catch(LobbyServiceException e)
+                        {
+                            PopUpDialogue.Instance.OpenDialogue("Die Lobby scheint inaktiv zu sein...", "OK", () =>
+                            {
+                                NetworkManager.Singleton.Shutdown();
+                                leaveLobby();
+                                lobbyState = LobbyState.create;
+                            });
+                            Debug.Log(e);
+                        }
                     }
                     pollTime += Time.deltaTime;
 

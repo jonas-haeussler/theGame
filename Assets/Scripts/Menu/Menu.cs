@@ -5,6 +5,7 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
 using Unity.Netcode;
+using Unity.Services.Lobbies;
 using Unity.Services.Authentication;
 using UnityEngine.SceneManagement;
 using Unity.Netcode.Transports.UTP;
@@ -102,6 +103,7 @@ namespace Menu
                 PopUpDialogue.Instance.OpenDialogue("Willst du das Spiel wirklich verlassen?", "Ja", "Nein", () => Application.Quit());
             });
 
+
         }
 
         // Start is called before the first frame update
@@ -109,18 +111,19 @@ namespace Menu
         {
             NetworkManager.Singleton.GetComponent<NetworkConnection>().ClearConnectCallbacks();
             NetworkManager.Singleton.GetComponent<NetworkConnection>().ClearDisconnectCallbacks();
-            NetworkManager.Singleton.GetComponent<NetworkConnection>().AddConnectCallback((clientId) =>
+            NetworkManager.Singleton.GetComponent<NetworkConnection>().AddConnectCallback(async (clientId) =>
             {
                 Debug.Log($"Client connected: {clientId}");
-                if (NetworkManager.Singleton.IsHost)
+                lobbyScreen.lobby = await LobbyService.Instance.GetLobbyAsync(lobbyScreen.lobby.Id);
+                if (NetworkManager.Singleton.IsHost && lobbyScreen.lobby.Players.Count == 2)
                 {
                     lobbyScreen.lobbyState = LobbyScreen.LobbyState.ready;
                 }
             });
-            NetworkManager.Singleton.GetComponent<NetworkConnection>().AddDisconnectCallback((clientId) =>
+            NetworkManager.Singleton.GetComponent<NetworkConnection>().AddDisconnectCallback(async (clientId) =>
             {
                 Debug.Log($"Client disconnected: {clientId}");
-                
+                await LobbyService.Instance.RemovePlayerAsync(lobbyScreen.lobby.Id, lobbyScreen.lobby.Players[(int)clientId].Id);
                 if (NetworkManager.Singleton.IsHost)
                 {
                     PopUpDialogue.Instance.OpenDialogue("Dein Mitspieler hat die Lobby verlassen.", "OK", () =>
@@ -148,7 +151,6 @@ namespace Menu
 
         private void onScreenUpdate()
         {
-            Debug.Log("Hier");
             mainMenu.gameObject.SetActive(false);
             lobbyScreen.gameObject.SetActive(false);
             if(joinLobbyScreenInst != null)

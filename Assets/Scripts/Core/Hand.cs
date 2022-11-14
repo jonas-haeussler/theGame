@@ -109,13 +109,17 @@ namespace Core {
         public int GetCardIndexFromPosition(Transform cardTransform) 
         {
             Vector3 position = cardTransform.position;
+            var scaleFactor = GetComponentInParent<Canvas>().scaleFactor;
             handCards = GetComponentsInChildren<Card>().ToList();
             for (int i = 0; i < handCards.Count; i++) 
             {
                 if (handCards[i].transform.Equals(cardTransform)) continue;
-                Vector3 cardPos = transform.position + getCardPosition(i, handCards.Count);
+                Vector3 cardPos = transform.position + getCardPosition(i, handCards.Count) * scaleFactor;
+                Debug.Log(scaleFactor);
+                Debug.Log(transform.position);
+                Debug.Log(getCardPosition(i, handCards.Count));
 
-                if (Mathf.Abs(position.x - cardPos.x) < 10 && Mathf.Abs(position.y - cardPos.y) < 200)
+                if (Mathf.Abs(position.x - cardPos.x) < 25 * scaleFactor && Mathf.Abs(position.y - cardPos.y) < 100 * scaleFactor)
                     return i;
             }
             return -1;
